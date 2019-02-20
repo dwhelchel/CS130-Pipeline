@@ -97,7 +97,6 @@ void render(driver_state& state, render_type type)
             rasterize_triangle(state, geo);
 
             // Deallocate memory used
-            delete [] geo;
             delete [] dg1.data;
             delete [] dg2.data;
             delete [] dg3.data;
