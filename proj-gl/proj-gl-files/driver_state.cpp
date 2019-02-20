@@ -89,9 +89,9 @@ void render(driver_state& state, render_type type)
         geo[2] = &dg3;
 
         // Call vertex shader with data_vertex, data_geometry, and uniform_data
-        state.vertex_shader(dv1, geo[0], state.uniform_data);
-        state.vertex_shader(dv2, geo[1], state.uniform_data);
-        state.vertex_shader(dv3, geo[2], state.uniform_data);
+        state.vertex_shader(dv1, dg1, state.uniform_data);
+        state.vertex_shader(dv2, dg2, state.uniform_data);
+        state.vertex_shader(dv3, dg3, state.uniform_data);
 
         // Rasterize the triangle with state and new vertex array
         rasterize_triangle(state, geo);
