@@ -23,6 +23,7 @@ void initialize_render(driver_state& state, int width, int height)
 
     unsigned long total_pixels = width * height;
     state.image_color = new pixel[total_pixels];
+    state.image_depth = new float[total_pixels];
 
     for (unsigned int i = 0; i < total_pixels; ++i) {
         state.image_color[i] = make_pixel(0, 0, 0);
@@ -41,24 +42,82 @@ void initialize_render(driver_state& state, int width, int height)
 void render(driver_state& state, render_type type)
 {
 
+    // Determine the type of rendering
     switch (type) {
-        case triangle:
-        data_geometry geo[3];
-        float * current = state.vertex_data;
-        for (int i = 0; i < state.num_vertices; ++i) {
-            geo[i].data = current;
-            current = current->next;
+        case 0:
+        break;
+
+        /* Triangle */
+        case 1:
+
+        // Vertex array
+        const data_geometry * geo[3];
+
+        // Data geometry and data vertex variables
+        data_geometry dg1;
+        data_geometry dg2;
+        data_geometry dg3;
+        data_vertex dv1;
+        data_vertex dv2;
+        data_vertex dv3;
+
+        // Allocate memory of floats_per_vertex size per data array
+        dg1.data = new float[floats_per_vertex];
+        dg2.data = new float[floats_per_vertex];
+        dg3.data = new float[floats_per_vertex];
+        dv1.data = new float[floats_per_vertex];
+        dv2.data = new float[floats_per_vertex];
+        dv3.data = new float[floats_per_vertex];
+
+        // Assign appropriate data values from vertex_data into data_vertex
+        for (int i = 0; i < floats_per_vertex; ++i) {
+            dv1.data[i] = state.vertex_data[0*floats_per_vertex+i];
+            dg1.data[i] = state.vertex_data[0*floats_per_vertex+i];
         }
+        for (int i = 0; i < floats_per_vertex; ++i) {
+            dv2.data[i] = state.vertex_data[1*floats_per_vertex+i];
+            dg2.data[i] = state.vertex_data[1*floats_per_vertex+i];
+        }
+        for (int i = 0; i < floats_per_vertex; ++i) {
+            dv3.data[i] = state.vertex_data[2*floats_per_vertex+i];
+            dg3.data[i] = state.vertex_data[2*floats_per_vertex+i];
+        }
+
+        // Set the pointers in geo to the proper locations
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        // Call vertex shader with data_vertex, data_geometry, and uniform_data
+        vertex_shader(dv1, geo[0], state.uniform_data);
+        vertex_shader(dv2, geo[1], state.uniform_data);
+        vertex_shader(dv3, geo[2], state.uniform_data);
+
+        // Rasterize the triangle with state and new vertex array
         rasterize_triangle(state, geo);
+
+        // Deallocate memory used
+        delete [] geo;
+        delete [] dg1.data;
+        delete [] dg2.data;
+        delete [] dg3.data;
+        delete [] dv1.data;
+        delete [] dv2.data;
+        delete [] dv3.data;
+
+        // Exit
         break;
 
-        case indexed:
+        /* Indexed */
+        case 2:
         break;
 
-        case fan:
+        /* Fan */
+        case 3:
         break;
 
-        case strip:
+        /* Strip */
+        case 4:
         break;
     }
 
@@ -86,8 +145,6 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
 // fragments, calling the fragment shader, and z-buffering.
 void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
-    for (int i = 0; i < 2; ++i) {
-        state.vertex_shader( , in[i], state.uniform_data);
-    }
+
     // std::cout<<"TODO: implement rasterization"<<std::endl;
 }
