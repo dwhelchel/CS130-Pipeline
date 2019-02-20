@@ -44,11 +44,11 @@ void render(driver_state& state, render_type type)
 
     // Determine the type of rendering
     switch (type) {
-        case 0:
+        case invalid:
         break;
 
         /* Triangle */
-        case 1:
+        case triangle:
 
         // Vertex array
         const data_geometry * geo[3];
@@ -109,15 +109,15 @@ void render(driver_state& state, render_type type)
         break;
 
         /* Indexed */
-        case 2:
+        case indexed:
         break;
 
         /* Fan */
-        case 3:
+        case fan:
         break;
 
         /* Strip */
-        case 4:
+        case strip:
         break;
     }
 
