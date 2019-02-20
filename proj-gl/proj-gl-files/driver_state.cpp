@@ -122,7 +122,7 @@ void render(driver_state& state, render_type type)
         break;
     }
 
-    std::cout<<"TODO: implement rendering."<<std::endl;
+    // std::cout<<"TODO: implement rendering."<<std::endl;
 }
 
 
