@@ -182,7 +182,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             double gamma = gammaA / totalArea;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
-                double index = i+j*w;
+                unsigned int index = i+j*state.image_width;
                 state.image_color[index] = make_pixel(255, 255, 255);
             }
         }
