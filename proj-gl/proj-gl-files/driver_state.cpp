@@ -49,62 +49,62 @@ void render(driver_state& state, render_type type)
 
         /* Triangle */
         case render_type::triangle:
+        {
+            // Vertex array
+            const data_geometry * geo[3];
 
-        // Vertex array
-        const data_geometry * geo[3];
+            // Data geometry and data vertex variables
+            data_geometry dg1;
+            data_geometry dg2;
+            data_geometry dg3;
+            data_vertex dv1;
+            data_vertex dv2;
+            data_vertex dv3;
 
-        // Data geometry and data vertex variables
-        data_geometry dg1;
-        data_geometry dg2;
-        data_geometry dg3;
-        data_vertex dv1;
-        data_vertex dv2;
-        data_vertex dv3;
+            // Allocate memory of floats_per_vertex size per data array
+            dg1.data = new float[state.floats_per_vertex];
+            dg2.data = new float[state.floats_per_vertex];
+            dg3.data = new float[state.floats_per_vertex];
+            dv1.data = new float[state.floats_per_vertex];
+            dv2.data = new float[state.floats_per_vertex];
+            dv3.data = new float[state.floats_per_vertex];
 
-        // Allocate memory of floats_per_vertex size per data array
-        dg1.data = new float[state.floats_per_vertex];
-        dg2.data = new float[state.floats_per_vertex];
-        dg3.data = new float[state.floats_per_vertex];
-        dv1.data = new float[state.floats_per_vertex];
-        dv2.data = new float[state.floats_per_vertex];
-        dv3.data = new float[state.floats_per_vertex];
+            // Assign appropriate data values from vertex_data into data_vertex
+            for (int i = 0; i < state.floats_per_vertex; ++i) {
+                dv1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+                dg1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+            }
+            for (int i = 0; i < state.floats_per_vertex; ++i) {
+                dv2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
+                dg2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
+            }
+            for (int i = 0; i < state.floats_per_vertex; ++i) {
+                dv3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
+                dg3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
+            }
 
-        // Assign appropriate data values from vertex_data into data_vertex
-        for (int i = 0; i < state.floats_per_vertex; ++i) {
-            dv1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
-            dg1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+            // Set the pointers in geo to the proper locations
+            geo[0] = &dg1;
+            geo[1] = &dg2;
+            geo[2] = &dg3;
+
+            // Call vertex shader with data_vertex, data_geometry, and uniform_data
+            state.vertex_shader(dv1, dg1, state.uniform_data);
+            state.vertex_shader(dv2, dg2, state.uniform_data);
+            state.vertex_shader(dv3, dg3, state.uniform_data);
+
+            // Rasterize the triangle with state and new vertex array
+            rasterize_triangle(state, geo);
+
+            // Deallocate memory used
+            delete [] geo;
+            delete [] dg1.data;
+            delete [] dg2.data;
+            delete [] dg3.data;
+            delete [] dv1.data;
+            delete [] dv2.data;
+            delete [] dv3.data;
         }
-        for (int i = 0; i < state.floats_per_vertex; ++i) {
-            dv2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
-            dg2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
-        }
-        for (int i = 0; i < state.floats_per_vertex; ++i) {
-            dv3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
-            dg3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
-        }
-
-        // Set the pointers in geo to the proper locations
-        geo[0] = &dg1;
-        geo[1] = &dg2;
-        geo[2] = &dg3;
-
-        // Call vertex shader with data_vertex, data_geometry, and uniform_data
-        state.vertex_shader(dv1, dg1, state.uniform_data);
-        state.vertex_shader(dv2, dg2, state.uniform_data);
-        state.vertex_shader(dv3, dg3, state.uniform_data);
-
-        // Rasterize the triangle with state and new vertex array
-        rasterize_triangle(state, geo);
-
-        // Deallocate memory used
-        delete [] geo;
-        delete [] dg1.data;
-        delete [] dg2.data;
-        delete [] dg3.data;
-        delete [] dv1.data;
-        delete [] dv2.data;
-        delete [] dv3.data;
-
         // Exit
         break;
 
