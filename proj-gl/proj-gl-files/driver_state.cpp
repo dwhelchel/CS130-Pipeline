@@ -21,10 +21,12 @@ void initialize_render(driver_state& state, int width, int height)
     state.image_color=0;
     state.image_depth=0;
 
+    // Set image_color and image_depth to size width*height pixels
     unsigned long total_pixels = width * height;
     state.image_color = new pixel[total_pixels];
     state.image_depth = new float[total_pixels];
 
+    // Set all pixels to black
     for (unsigned int i = 0; i < total_pixels; ++i) {
         state.image_color[i] = make_pixel(0, 0, 0);
     }
@@ -144,6 +146,47 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
 // fragments, calling the fragment shader, and z-buffering.
 void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
+
+    // Vertex A
+    double Ax = in[0]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double Ay = in[0]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+
+    // Vertex B
+    double Bx = in[1]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double By = in[1]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+
+    // Vertex C
+    double Cx = in[2]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double Cy = in[2]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+
+    // barycentric areas
+    double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) - (Ax*By - Bx*Ay));
+    double alphaA = 0;
+    double betaA = 0;
+    double gammaA = 0;
+
+    // loop over all pixels and do barycentric calculations
+    for (int i = 0; i < state.image_width; ++i){
+        for (int j = 0; j < state.image_height; ++j) {
+
+            // Calculating alpha
+            alphaA = 0.5 * ((Bx*Cy - Cx*By) + (By - Cy)*i + (Cx-Bx)*j);
+            double alpha = alphaA / totalArea;
+
+            // Calulcating beta
+            betaA = 0.5 * ((Cx*Ay - Ax*Cy) + (Cy - Ay)*i + (Ax - Cx)*j);
+            double beta = betaA / totalArea;
+
+            // Calulating gamma
+            gammaA = 0.5 * ((Ax*By - Bx*Ay) + (Ay - By)*i + (Bx - Ax)*j);
+            double gamma = gammaA / totalArea;
+
+            if (alpha >= 0 && beta >= 0 && gamma >= 0) {
+                double index = i+j*w;
+                state.image_color[index] = make_pixel(255, 255, 255);
+            }
+        }
+    }
 
     // std::cout<<"TODO: implement rasterization"<<std::endl;
 }
