@@ -79,12 +79,12 @@ void render(driver_state& state, render_type type)
                     dg1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv2.data[i] = state.vertex_data[v+1*state.floats_per_vertex+i];
-                    dg2.data[i] = state.vertex_data[v+1*state.floats_per_vertex+i];
+                    dv2.data[i] = state.vertex_data[(v+1)*state.floats_per_vertex+i];
+                    dg2.data[i] = state.vertex_data[(v+1)*state.floats_per_vertex+i];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv3.data[i] = state.vertex_data[v+2*state.floats_per_vertex+i];
-                    dg3.data[i] = state.vertex_data[v+2*state.floats_per_vertex+i];
+                    dv3.data[i] = state.vertex_data[(v+2)*state.floats_per_vertex+i];
+                    dg3.data[i] = state.vertex_data[(v+2)*state.floats_per_vertex+i];
                 }
 
                 // Divide position by w
