@@ -87,11 +87,6 @@ void render(driver_state& state, render_type type)
                     dg3.data[i] = state.vertex_data[(v+2)*state.floats_per_vertex+i];
                 }
 
-                // Divide position by w
-                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
-
                 // Set the pointers in geo to the proper locations
                 geo[0] = &dg1;
                 geo[1] = &dg2;
@@ -101,6 +96,11 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv1, dg1, state.uniform_data);
                 state.vertex_shader(dv2, dg2, state.uniform_data);
                 state.vertex_shader(dv3, dg3, state.uniform_data);
+
+                // Divide position by w
+                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
+                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
+                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
 
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
