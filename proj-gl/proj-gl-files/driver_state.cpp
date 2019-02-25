@@ -71,7 +71,7 @@ void render(driver_state& state, render_type type)
             dv2.data = new float[state.floats_per_vertex];
             dv3.data = new float[state.floats_per_vertex];
 
-            for (int v = 0; v < state.num_vertices; v += 3) {
+            for (int v = 0; v < state.num_vertices * state.floats_per_vertex; v += 3) {
 
                 // Assign appropriate data values from vertex_data into data_vertex
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
