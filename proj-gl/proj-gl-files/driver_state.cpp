@@ -74,16 +74,16 @@ void render(driver_state& state, render_type type)
             for (int v = 0; v < state.num_vertices; v += 2) {
                 // Assign appropriate data values from vertex_data into data_vertex
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
-                    dg1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+                    dv1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
+                    dg1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
-                    dg2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
+                    dv2.data[i] = state.vertex_data[v+1*state.floats_per_vertex+i];
+                    dg2.data[i] = state.vertex_data[v+1*state.floats_per_vertex+i];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
-                    dg3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
+                    dv3.data[i] = state.vertex_data[v+2*state.floats_per_vertex+i];
+                    dg3.data[i] = state.vertex_data[v+2*state.floats_per_vertex+i];
                 }
 
                 // Divide position by w
