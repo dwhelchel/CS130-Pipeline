@@ -88,9 +88,9 @@ void render(driver_state& state, render_type type)
                 }
 
                 // Divide position by w
-                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
+                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[4];
+                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[4];
+                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[4];
 
                 // Set the pointers in geo to the proper locations
                 geo[0] = &dg1;
