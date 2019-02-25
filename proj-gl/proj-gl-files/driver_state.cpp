@@ -72,6 +72,7 @@ void render(driver_state& state, render_type type)
             dv3.data = new float[state.floats_per_vertex];
 
             for (int v = 0; v < state.num_vertices; v += 3) {
+
                 // Assign appropriate data values from vertex_data into data_vertex
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
                     dv1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
@@ -103,6 +104,7 @@ void render(driver_state& state, render_type type)
 
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
+
             }
 
             // Deallocate memory used
@@ -177,15 +179,15 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
         for (int j = 0; j < state.image_height; ++j) {
 
             // Calculating alpha
-            alphaA = 0.5 * ((Bx*Cy - Cx*By) + (By - Cy)*i + (Cx-Bx)*j);
+            alphaA = 0.5 * ((Bx*Cy - Cx*By) - (By - Cy)*i + (Cx-Bx)*j);
             double alpha = alphaA / totalArea;
 
             // Calulcating beta
-            betaA = 0.5 * ((Cx*Ay - Ax*Cy) + (Cy - Ay)*i + (Ax - Cx)*j);
+            betaA = 0.5 * ((Cx*Ay - Ax*Cy) - (Cy - Ay)*i + (Ax - Cx)*j);
             double beta = betaA / totalArea;
 
             // Calulating gamma
-            gammaA = 0.5 * ((Ax*By - Bx*Ay) + (Ay - By)*i + (Bx - Ax)*j);
+            gammaA = 0.5 * ((Ax*By - Bx*Ay) - (Ay - By)*i + (Bx - Ax)*j);
             double gamma = gammaA / totalArea;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
