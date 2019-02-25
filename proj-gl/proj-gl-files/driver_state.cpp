@@ -71,37 +71,39 @@ void render(driver_state& state, render_type type)
             dv2.data = new float[state.floats_per_vertex];
             dv3.data = new float[state.floats_per_vertex];
 
-            // Assign appropriate data values from vertex_data into data_vertex
-            for (int i = 0; i < state.floats_per_vertex; ++i) {
-                dv1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
-                dg1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+            for (int v = 0; v < state.num_vertices; i += 2) {
+                // Assign appropriate data values from vertex_data into data_vertex
+                for (int i = 0; i < state.floats_per_vertex; ++i) {
+                    dv1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+                    dg1.data[i] = state.vertex_data[0*state.floats_per_vertex+i];
+                }
+                for (int i = 0; i < state.floats_per_vertex; ++i) {
+                    dv2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
+                    dg2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
+                }
+                for (int i = 0; i < state.floats_per_vertex; ++i) {
+                    dv3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
+                    dg3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
+                }
+
+                // Divide position by w
+                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
+                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
+                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
+
+                // Set the pointers in geo to the proper locations
+                geo[0] = &dg1;
+                geo[1] = &dg2;
+                geo[2] = &dg3;
+
+                // Call vertex shader with data_vertex, data_geometry, and uniform_data
+                state.vertex_shader(dv1, dg1, state.uniform_data);
+                state.vertex_shader(dv2, dg2, state.uniform_data);
+                state.vertex_shader(dv3, dg3, state.uniform_data);
+
+                // Rasterize the triangle with state and new vertex array
+                rasterize_triangle(state, geo);
             }
-            for (int i = 0; i < state.floats_per_vertex; ++i) {
-                dv2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
-                dg2.data[i] = state.vertex_data[1*state.floats_per_vertex+i];
-            }
-            for (int i = 0; i < state.floats_per_vertex; ++i) {
-                dv3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
-                dg3.data[i] = state.vertex_data[2*state.floats_per_vertex+i];
-            }
-
-            // Divide position by w
-            dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-            dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-            dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
-
-            // Set the pointers in geo to the proper locations
-            geo[0] = &dg1;
-            geo[1] = &dg2;
-            geo[2] = &dg3;
-
-            // Call vertex shader with data_vertex, data_geometry, and uniform_data
-            state.vertex_shader(dv1, dg1, state.uniform_data);
-            state.vertex_shader(dv2, dg2, state.uniform_data);
-            state.vertex_shader(dv3, dg3, state.uniform_data);
-
-            // Rasterize the triangle with state and new vertex array
-            rasterize_triangle(state, geo);
 
             // Deallocate memory used
             delete [] dg1.data;
@@ -165,7 +167,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
     double Cy = in[2]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // barycentric areas
-    double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) - (Ax*By - Bx*Ay));
+    double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) + (Ax*By - Bx*Ay));
     double alphaA = 0;
     double betaA = 0;
     double gammaA = 0;
