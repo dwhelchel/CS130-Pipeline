@@ -208,9 +208,11 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                    (beta / in[1]->gl_Position[3]) +
                                    (gamma / in[2]->gl_Position[3]);
 
-                        double newAlpha = alpha / in[0]->gl_Position[3] / k;
-                        double newBeta = beta / in[1]->gl_Position[3] / k;
-                        double newGamma = gamma / in[2]->gl_Position[3] / k;
+                        std::cout << "HELLO" << std::endl;
+
+                        double newAlpha = alpha / (in[0]->gl_Position[3] * k);
+                        double newBeta = beta / (in[1]->gl_Position[3] * k);
+                        double newGamma = gamma / (in[2]->gl_Position[3] * k);
 
                         df.data[i] = newAlpha * in[0]->data[i] +
                                        newBeta * in[1]->data[i] +
