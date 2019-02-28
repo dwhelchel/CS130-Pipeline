@@ -29,6 +29,7 @@ void initialize_render(driver_state& state, int width, int height)
     // Set all pixels to black
     for (unsigned int i = 0; i < total_pixels; ++i) {
         state.image_color[i] = make_pixel(0, 0, 0);
+        state.image_depth[i] = 1;
     }
 
     // std::cout<<"TODO: allocate and initialize state.image_color and state.image_depth."<<std::endl;
@@ -97,6 +98,11 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv2, dg2, state.uniform_data);
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
+                // Divide position by w
+                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
+                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
+                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
+
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
 
@@ -151,11 +157,6 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
 void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
 
-    // Divide position by w
-    dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-    dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-    dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
-
     // Vertex A
     double Ax = in[0]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
     double Ay = in[0]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
@@ -201,35 +202,46 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             double gamma = gammaA / totalArea;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
-                for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    if (state.interp_rules[i] == interp_type::flat) {
-                        df.data[i] = in[0]->data[i];
-                    }
-                    else if (state.interp_rules[i] == interp_type::smooth) {
 
-                        k = (alpha / in[0]->gl_Position[3]) +
-                            (beta / in[1]->gl_Position[3]) +
-                            (gamma / in[2]->gl_Position[3]);
+                unsigned int index = i+j*state.image_width;
 
-                        newAlpha = alpha / (in[0]->gl_Position[3] * k);
-                        newBeta = beta / (in[1]->gl_Position[3] * k);
-                        newGamma = gamma / (in[2]->gl_Position[3] * k);
+                double depth = (alpha * in[0]->gl_Position[2]) +
+                               (beta * in[1]->gl_Position[2]) +
+                               (gamma * in[2]->gl_Position[2]);
 
-                        df.data[i] = newAlpha * in[0]->data[i] +
-                                       newBeta * in[1]->data[i] +
-                                       newGamma * in[2]->data[i];
-                    }
-                    else if (state.interp_rules[i] == interp_type::noperspective) {
-                        df.data[i] = alpha * in[0]->data[i] +
-                                       beta * in[1]->data[i] +
-                                       gamma * in[2]->data[i];
+                if (depth < state.image_depth[index]) {
+                    for (int i = 0; i < state.floats_per_vertex; ++i) {
+                        if (state.interp_rules[i] == interp_type::flat) {
+                            df.data[i] = in[0]->data[i];
+                        }
+                        else if (state.interp_rules[i] == interp_type::smooth) {
+
+                            k = (alpha / in[0]->gl_Position[3]) +
+                                (beta / in[1]->gl_Position[3]) +
+                                (gamma / in[2]->gl_Position[3]);
+
+                            newAlpha = alpha / (in[0]->gl_Position[3] * k);
+                            newBeta = beta / (in[1]->gl_Position[3] * k);
+                            newGamma = gamma / (in[2]->gl_Position[3] * k);
+
+                            df.data[i] = newAlpha * in[0]->data[i] +
+                                           newBeta * in[1]->data[i] +
+                                           newGamma * in[2]->data[i];
+                        }
+                        else if (state.interp_rules[i] == interp_type::noperspective) {
+                            df.data[i] = alpha * in[0]->data[i] +
+                                           beta * in[1]->data[i] +
+                                           gamma * in[2]->data[i];
+                        }
                     }
                 }
+                
                 state.fragment_shader(df, dout, state.uniform_data);
-                unsigned int index = i+j*state.image_width;
                 state.image_color[index] = make_pixel(dout.output_color[0] * 255,
                                                       dout.output_color[1] * 255,
                                                       dout.output_color[2] * 255);
+
+                state.image_depth[index] = depth;
             }
         }
     }
