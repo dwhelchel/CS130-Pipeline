@@ -107,8 +107,6 @@ void render(driver_state& state, render_type type)
                 dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
                 dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
 
-                std::cout << v << std::endl;
-
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
 
@@ -207,7 +205,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             gammaA = (i - Ax) * (By - Ay) - (j - Ay) * (Bx - Ax);
             double gamma = gammaA / totalArea;
 
-            // std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
+            std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
