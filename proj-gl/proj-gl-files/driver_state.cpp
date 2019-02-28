@@ -97,11 +97,6 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv2, dg2, state.uniform_data);
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
-                // Divide position by w
-                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
-
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
 
@@ -156,6 +151,11 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
 void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
 
+    // Divide position by w
+    dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
+    dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
+    dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
+
     // Vertex A
     double Ax = in[0]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
     double Ay = in[0]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
@@ -208,8 +208,8 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                     else if (state.interp_rules[i] == interp_type::smooth) {
 
                         k = (alpha / in[0]->gl_Position[3]) +
-                                   (beta / in[1]->gl_Position[3]) +
-                                   (gamma / in[2]->gl_Position[3]);
+                            (beta / in[1]->gl_Position[3]) +
+                            (gamma / in[2]->gl_Position[3]);
 
                         newAlpha = alpha / (in[0]->gl_Position[3] * k);
                         newBeta = beta / (in[1]->gl_Position[3] * k);
