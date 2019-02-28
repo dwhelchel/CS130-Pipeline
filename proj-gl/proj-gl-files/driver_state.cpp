@@ -201,6 +201,8 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             gammaA = (i - Ax) * (By - Ay) - (j - Ay) * (Bx - Ax);
             double gamma = gammaA / totalArea;
 
+            std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
+
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
                 unsigned int index = i+j*state.image_width;
