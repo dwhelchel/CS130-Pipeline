@@ -176,11 +176,11 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
     // Data fragment and Data output
     data_fragment df;
-    data_output = do;
+    data_output dout;
 
     // Allocate memory for df and temp array
     df.data = new float[MAX_FLOATS_PER_VERTEX];
-    float tempArray = new float[MAX_FLOATS_PER_VERTEX];
+    float * tempArray = new float[MAX_FLOATS_PER_VERTEX];
 
     // loop over all pixels and do barycentric calculations
     for (int i = 0; i < state.image_width; ++i){
@@ -199,7 +199,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             double gamma = gammaA / totalArea;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
-                for (unsigned int i = 0; i < MAX_FLOATS_PER_VERTEX; ++i) {
+                for (int i = 0; i < MAX_FLOATS_PER_VERTEX; ++i) {
                     if (state.interp_rules[i] == interp_type::flat) {
                         tempArray[i] = in[0]->data[i-1];
                     }
@@ -207,14 +207,14 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                         // Do something
 
                     }
-                    else if (state.interp_rules[i] == interp_rules::noperspective) {
+                    else if (state.interp_rules[i] == interp_type::noperspective) {
                         tempArray[i] = alpha * in[0]->data[i-1] +
                                        beta * in[1]->data[i-1] +
                                        gamma * in[2]->data[i-1];
                     }
                 }
-                df = &tempArray;
-                fragment_shader(df, do, state.uniform_data);
+                df.data = &tempArray;
+                fragment_shader(df, dout, state.uniform_data);
                 unsigned int index = i+j*state.image_width;
                 state.image_color[index] = make_pixel(do.output_color[0] * 255,
                                                       do.output_color[1] * 255,
