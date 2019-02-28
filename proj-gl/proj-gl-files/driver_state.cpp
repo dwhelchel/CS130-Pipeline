@@ -180,7 +180,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
     // Allocate memory for df and temp array
     df.data = new float[MAX_FLOATS_PER_VERTEX];
-    float tempArray[MAX_FLOATS_PER_VERTEX];
+    float tempArray[] = new float[MAX_FLOATS_PER_VERTEX];
 
     // loop over all pixels and do barycentric calculations
     for (int i = 0; i < state.image_width; ++i){
@@ -216,9 +216,9 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                 df.data = &tempArray;
                 fragment_shader(df, dout, state.uniform_data);
                 unsigned int index = i+j*state.image_width;
-                state.image_color[index] = make_pixel(do.output_color[0] * 255,
-                                                      do.output_color[1] * 255,
-                                                      do.output_color[2] * 255);
+                state.image_color[index] = make_pixel(dout.output_color[0] * 255,
+                                                      dout.output_color[1] * 255,
+                                                      dout.output_color[2] * 255);
             }
         }
     }
