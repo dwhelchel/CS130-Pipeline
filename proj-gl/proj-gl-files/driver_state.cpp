@@ -72,11 +72,7 @@ void render(driver_state& state, render_type type)
             dv2.data = new float[state.floats_per_vertex];
             dv3.data = new float[state.floats_per_vertex];
 
-            double num_triangles = state.num_vertices / 3.0;
-
-            int v = 0;
-
-            for (int j = 0; j < num_triangles; j++, v += 3) {
+            for (int v = 0; v < state.num_vertices * state.floats_per_vertex; v += 3 * state.floats_per_vertex) {
 
                 // Assign appropriate data values from vertex_data into data_vertex
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
@@ -174,7 +170,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
     double Cy = in[2]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // barycentric areas
-    double totalArea = (Cx - Ax) * (By - Ay) - (Cy - Ay) * (Bx - Ax);
+    double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) + (Ax*By - Bx*Ay));
     double alphaA = 0;
     double betaA = 0;
     double gammaA = 0;
@@ -194,18 +190,18 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
         for (int j = 0; j < state.image_height; ++j) {
 
             // Calculating alpha
-            alphaA = (i - Bx) * (Cy - By) - (j - By) * (Cx - Bx);
+            alphaA = 0.5 * ((Bx*Cy - Cx*By) + (By - Cy)*i + (Cx-Bx)*j);
             double alpha = alphaA / totalArea;
 
             // Calulcating beta
-            betaA = (i - Cx) * (Ay - Cy) - (j - Cy) * (Ax - Cx);
+            betaA = 0.5 * ((Cx*Ay - Ax*Cy) + (Cy - Ay)*i + (Ax - Cx)*j);
             double beta = betaA / totalArea;
 
             // Calulating gamma
-            gammaA = (i - Ax) * (By - Ay) - (j - Ay) * (Bx - Ax);
+            gammaA = 0.5 * ((Ax*By - Bx*Ay) + (Ay - By)*i + (Bx - Ax)*j);
             double gamma = gammaA / totalArea;
 
-            std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
+            // std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
