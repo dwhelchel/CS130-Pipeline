@@ -201,7 +201,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             double gamma = gammaA / totalArea;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
-                for (int i = 0; i < MAX_FLOATS_PER_VERTEX; ++i) {
+                for (int i = 0; i < state.floats_per_vertex; ++i) {
                     if (state.interp_rules[i] == interp_type::flat) {
                         df.data[i] = in[0]->data[i];
                     }
