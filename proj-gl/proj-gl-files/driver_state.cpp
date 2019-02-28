@@ -170,7 +170,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
     double Cy = in[2]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // barycentric areas
-    double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) + (Ax*By - Bx*Ay));
+    double totalArea = (Cx - Ax) * (By - Ay) - (Cy - Ay) * (Bx - Ax);
     double alphaA = 0;
     double betaA = 0;
     double gammaA = 0;
@@ -190,18 +190,16 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
         for (int j = 0; j < state.image_height; ++j) {
 
             // Calculating alpha
-            alphaA = 0.5 * ((Bx*Cy - Cx*By) + (By - Cy)*i + (Cx-Bx)*j);
+            alphaA = (i - Bx) * (Cy - By) - (j - By) * (Cx - Bx);
             double alpha = alphaA / totalArea;
 
             // Calulcating beta
-            betaA = 0.5 * ((Cx*Ay - Ax*Cy) + (Cy - Ay)*i + (Ax - Cx)*j);
+            betaA = (i - Cx) * (Ay - Cy) - (j - Cy) * (Ax - Cx);
             double beta = betaA / totalArea;
 
             // Calulating gamma
-            gammaA = 0.5 * ((Ax*By - Bx*Ay) + (Ay - By)*i + (Bx - Ax)*j);
+            gammaA = (i - Ax) * (By - Ay) - (j - Ay) * (Bx - Ax);
             double gamma = gammaA / totalArea;
-
-            std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
 
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
