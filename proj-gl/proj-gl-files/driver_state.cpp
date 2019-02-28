@@ -179,7 +179,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
     data_output dout;
 
     // Allocate memory temp array
-    float * tempArray = new float[MAX_FLOATS_PER_VERTEX];
+    df.data = new float[MAX_FLOATS_PER_VERTEX];
 
     // loop over all pixels and do barycentric calculations
     for (int i = 0; i < state.image_width; ++i){
@@ -200,19 +200,18 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
                 for (int i = 0; i < MAX_FLOATS_PER_VERTEX; ++i) {
                     if (state.interp_rules[i] == interp_type::flat) {
-                        tempArray[i] = in[0]->data[i-1];
+                        df.data[i] = in[0]->data[i];
                     }
                     else if (state.interp_rules[i] == interp_type::smooth) {
                         // Do something
 
                     }
                     else if (state.interp_rules[i] == interp_type::noperspective) {
-                        tempArray[i] = alpha * in[0]->data[i-1] +
-                                       beta * in[1]->data[i-1] +
-                                       gamma * in[2]->data[i-1];
+                        df.data[i] = alpha * in[0]->data[i] +
+                                       beta * in[1]->data[i] +
+                                       gamma * in[2]->data[i];
                     }
                 }
-                df.data = tempArray;
                 state.fragment_shader(df, dout, state.uniform_data);
                 unsigned int index = i+j*state.image_width;
                 state.image_color[index] = make_pixel(dout.output_color[0] * 255,
@@ -222,8 +221,6 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
         }
     }
 
-    delete [] tempArray;
     delete [] df.data;
 
-    // std::cout<<"TODO: implement rasterization"<<std::endl;
 }
