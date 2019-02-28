@@ -181,6 +181,9 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
     // Allocate memory temp array
     df.data = new float[MAX_FLOATS_PER_VERTEX];
 
+    // New barycentric coordinates and k value
+    double newAlpha, newBeta, newGamma, k;
+
     // loop over all pixels and do barycentric calculations
     for (int i = 0; i < state.image_width; ++i){
         for (int j = 0; j < state.image_height; ++j) {
@@ -204,15 +207,13 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                     }
                     else if (state.interp_rules[i] == interp_type::smooth) {
 
-                        double k = (alpha / in[0]->gl_Position[3]) +
+                        k = (alpha / in[0]->gl_Position[3]) +
                                    (beta / in[1]->gl_Position[3]) +
                                    (gamma / in[2]->gl_Position[3]);
 
-                        std::cout << "HELLO" << std::endl;
-
-                        double newAlpha = alpha / (in[0]->gl_Position[3] * k);
-                        double newBeta = beta / (in[1]->gl_Position[3] * k);
-                        double newGamma = gamma / (in[2]->gl_Position[3] * k);
+                        newAlpha = alpha / (in[0]->gl_Position[3] * k);
+                        newBeta = beta / (in[1]->gl_Position[3] * k);
+                        newGamma = gamma / (in[2]->gl_Position[3] * k);
 
                         df.data[i] = newAlpha * in[0]->data[i] +
                                        newBeta * in[1]->data[i] +
