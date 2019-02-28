@@ -180,7 +180,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
     // Allocate memory for df and temp array
     df.data = new float[MAX_FLOATS_PER_VERTEX];
-    float * tempArray = new float[MAX_FLOATS_PER_VERTEX];
+    float tempArray = new float[MAX_FLOATS_PER_VERTEX];
 
     // loop over all pixels and do barycentric calculations
     for (int i = 0; i < state.image_width; ++i){
