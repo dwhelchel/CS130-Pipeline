@@ -201,6 +201,8 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
             gammaA = 0.5 * ((Ax*By - Bx*Ay) + (Ay - By)*i + (Bx - Ax)*j);
             double gamma = gammaA / totalArea;
 
+            std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
+
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
                 unsigned int index = i+j*state.image_width;
@@ -235,7 +237,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                         }
                     }
                 }
-                
+
                 state.fragment_shader(df, dout, state.uniform_data);
                 state.image_color[index] = make_pixel(dout.output_color[0] * 255,
                                                       dout.output_color[1] * 255,
