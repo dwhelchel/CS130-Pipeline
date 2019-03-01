@@ -29,7 +29,7 @@ void initialize_render(driver_state& state, int width, int height)
     // Set all pixels to black
     for (unsigned int i = 0; i < total_pixels; ++i) {
         state.image_color[i] = make_pixel(0, 0, 0);
-        state.image_depth[i] = 2;
+        state.image_depth[i] = 2.0f;
     }
 
     // std::cout<<"TODO: allocate and initialize state.image_color and state.image_depth."<<std::endl;
