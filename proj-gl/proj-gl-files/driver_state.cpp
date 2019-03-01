@@ -208,6 +208,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
             // std::cout << alphaA << " " << betaA << " " << gammaA << std::endl;
 
+            // Check if point lies within triangle
             if (alpha >= 0 && beta >= 0 && gamma >= 0) {
 
                 unsigned int index = i+j*state.image_width;
@@ -215,8 +216,6 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                 float depth = (alpha * a_position[2]) +
                                (beta * b_position[2]) +
                                (gamma * c_position[2]);
-
-                // std::cout << depth << " vs " << state.image_depth[index] << std::endl;
 
                 if (depth < state.image_depth[index]) {
                     for (int i = 0; i < state.floats_per_vertex; ++i) {
@@ -241,13 +240,13 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                            gamma * in[2]->data[i];
                         }
                     }
-                    state.image_depth[index] = depth;
-                }
 
-                state.fragment_shader(df, dout, state.uniform_data);
-                state.image_color[index] = make_pixel(dout.output_color[0] * 255,
-                                                      dout.output_color[1] * 255,
-                                                      dout.output_color[2] * 255);
+                    state.image_depth[index] = depth;
+                    state.fragment_shader(df, dout, state.uniform_data);
+                    state.image_color[index] = make_pixel(dout.output_color[0] * 255,
+                                                          dout.output_color[1] * 255,
+                                                          dout.output_color[2] * 255);
+                }
 
             }
         }
