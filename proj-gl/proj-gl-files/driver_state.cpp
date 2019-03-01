@@ -29,7 +29,7 @@ void initialize_render(driver_state& state, int width, int height)
     // Set all pixels to black
     for (unsigned int i = 0; i < total_pixels; ++i) {
         state.image_color[i] = make_pixel(0, 0, 0);
-        state.image_depth[i] = 1;
+        state.image_depth[i] = 2;
     }
 
     // std::cout<<"TODO: allocate and initialize state.image_color and state.image_depth."<<std::endl;
@@ -217,7 +217,6 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                (gamma * c_position[2]);
 
                 if (depth < state.image_depth[index]) {
-                    state.image_depth[index] = depth;
                     for (int i = 0; i < state.floats_per_vertex; ++i) {
                         if (state.interp_rules[i] == interp_type::flat) {
                             df.data[i] = in[0]->data[i];
@@ -240,6 +239,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                            gamma * in[2]->data[i];
                         }
                     }
+                    state.image_depth[index] = depth;
                 }
 
                 state.fragment_shader(df, dout, state.uniform_data);
