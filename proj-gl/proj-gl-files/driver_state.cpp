@@ -98,11 +98,6 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv2, dg2, state.uniform_data);
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
-                // Divide position by w
-                dg1.gl_Position = dg1.gl_Position / dg1.gl_Position[3];
-                dg2.gl_Position = dg2.gl_Position / dg2.gl_Position[3];
-                dg3.gl_Position = dg3.gl_Position / dg3.gl_Position[3];
-
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
 
@@ -157,17 +152,27 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
 void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
 
+    // Store w values
+    vec4 a_w = in[0]->gl_Position[3];
+    vec4 b_w = in[1]->gl_Position[3];
+    vec4 c_w = in[2]->gl_Position[3];
+
+    // Divide position by w
+    vec4 a_position = in[0]->gl_Position / in[0]->gl_Position[3];
+    vec4 b_position = in[1]->gl_Position / in[1]->gl_Position[3];
+    vec4 c_position = in[2]->gl_Position / in[2]->gl_Position[3];
+
     // Vertex A
-    double Ax = in[0]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
-    double Ay = in[0]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+    double Ax = a_position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double Ay = a_position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // Vertex B
-    double Bx = in[1]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
-    double By = in[1]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+    double Bx = b_position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double By = b_position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // Vertex C
-    double Cx = in[2]->gl_Position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
-    double Cy = in[2]->gl_Position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
+    double Cx = c_position[0] * (state.image_width / 2) + ((state.image_width / 2) - 0.5);
+    double Cy = c_position[1] * (state.image_height / 2) + ((state.image_height / 2) - 0.5);
 
     // barycentric areas
     double totalArea = 0.5 * ((Bx*Cy - Cx*By) - (Ax*Cy - Cx*Ay) + (Ax*By - Bx*Ay));
@@ -207,9 +212,9 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
                 unsigned int index = i+j*state.image_width;
 
-                double depth = (alpha * in[0]->gl_Position[2]) +
-                               (beta * in[1]->gl_Position[2]) +
-                               (gamma * in[2]->gl_Position[2]);
+                double depth = (alpha * a_position[2]) +
+                               (beta * b_position[2]) +
+                               (gamma * c_position[2]);
 
                 if (depth < state.image_depth[index]) {
                     for (int i = 0; i < state.floats_per_vertex; ++i) {
@@ -218,13 +223,11 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                         }
                         else if (state.interp_rules[i] == interp_type::smooth) {
 
-                            k = (alpha / in[0]->gl_Position[3]) +
-                                (beta / in[1]->gl_Position[3]) +
-                                (gamma / in[2]->gl_Position[3]);
+                            k = (alpha / a_w) + (beta / b_w) + (gamma / c_w);
 
-                            newAlpha = alpha / (in[0]->gl_Position[3] * k);
-                            newBeta = beta / (in[1]->gl_Position[3] * k);
-                            newGamma = gamma / (in[2]->gl_Position[3] * k);
+                            newAlpha = alpha / (a_w * k);
+                            newBeta = beta / (b_w * k);
+                            newGamma = gamma / (c_w * k);
 
                             df.data[i] = newAlpha * in[0]->data[i] +
                                            newBeta * in[1]->data[i] +
