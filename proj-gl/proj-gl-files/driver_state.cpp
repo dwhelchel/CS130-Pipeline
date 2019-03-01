@@ -216,6 +216,8 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                (beta * b_position[2]) +
                                (gamma * c_position[2]);
 
+                std::cout << depth << " vs " << state.image_depth[index] << std::endl;
+
                 if (depth < state.image_depth[index]) {
                     for (int i = 0; i < state.floats_per_vertex; ++i) {
                         if (state.interp_rules[i] == interp_type::flat) {
