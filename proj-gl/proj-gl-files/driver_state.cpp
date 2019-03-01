@@ -153,9 +153,9 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 {
 
     // Store w values
-    vec4 a_w = in[0]->gl_Position[3];
-    vec4 b_w = in[1]->gl_Position[3];
-    vec4 c_w = in[2]->gl_Position[3];
+    const float a_w = in[0]->gl_Position[3];
+    const float b_w = in[1]->gl_Position[3];
+    const float c_w = in[2]->gl_Position[3];
 
     // Divide position by w
     vec4 a_position = in[0]->gl_Position / in[0]->gl_Position[3];
