@@ -76,16 +76,16 @@ void render(driver_state& state, render_type type)
 
                 // Assign appropriate data values from vertex_data into data_vertex
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
-                    dg1.data[i] = state.vertex_data[v*state.floats_per_vertex+i];
+                    dv1.data[i] = state.vertex_data[i + 0*state.floats_per_vertex+v];
+                    dg1.data[i] = state.vertex_data[i + 0*state.floats_per_vertex+v];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv2.data[i] = state.vertex_data[(v+1)*state.floats_per_vertex+i];
-                    dg2.data[i] = state.vertex_data[(v+1)*state.floats_per_vertex+i];
+                    dv2.data[i] = state.vertex_data[i + 1*state.floats_per_vertex+v];
+                    dg2.data[i] = state.vertex_data[i + 1*state.floats_per_vertex+v];
                 }
                 for (int i = 0; i < state.floats_per_vertex; ++i) {
-                    dv3.data[i] = state.vertex_data[(v+2)*state.floats_per_vertex+i];
-                    dg3.data[i] = state.vertex_data[(v+2)*state.floats_per_vertex+i];
+                    dv3.data[i] = state.vertex_data[i + 2*state.floats_per_vertex+v];
+                    dg3.data[i] = state.vertex_data[i + 2*state.floats_per_vertex+v];
                 }
 
                 // Set the pointers in geo to the proper locations
