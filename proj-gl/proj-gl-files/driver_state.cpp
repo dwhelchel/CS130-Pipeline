@@ -212,7 +212,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
 
                 unsigned int index = i+j*state.image_width;
 
-                double depth = (alpha * a_position[2]) +
+                float depth = (alpha * a_position[2]) +
                                (beta * b_position[2]) +
                                (gamma * c_position[2]);
 
