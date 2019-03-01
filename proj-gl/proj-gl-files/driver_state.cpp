@@ -216,7 +216,7 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                (beta * b_position[2]) +
                                (gamma * c_position[2]);
 
-                if (depth > state.image_depth[index]) {
+                if (depth < state.image_depth[index]) {
                     for (int i = 0; i < state.floats_per_vertex; ++i) {
                         if (state.interp_rules[i] == interp_type::flat) {
                             df.data[i] = in[0]->data[i];
@@ -238,8 +238,8 @@ void rasterize_triangle(driver_state& state, const data_geometry* in[3])
                                            beta * in[1]->data[i] +
                                            gamma * in[2]->data[i];
                         }
+                        state.image_depth[index] = depth;
                     }
-                    state.image_depth[index] = depth;
                 }
 
                 state.fragment_shader(df, dout, state.uniform_data);
