@@ -100,6 +100,7 @@ void render(driver_state& state, render_type type)
 
                 // Rasterize the triangle with state and new vertex array
                 rasterize_triangle(state, geo);
+                // clip_triangle(state, geo, 0);
 
             }
 
@@ -142,7 +143,20 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
         rasterize_triangle(state, in);
         return;
     }
-    std::cout<<"TODO: implement clipping. (The current code passes the triangle through without clipping them.)"<<std::endl;
+    // std::cout<<"TODO: implement clipping. (The current code passes the triangle through without clipping them.)"<<std::endl;
+    if (face == 0) {
+        // clip right plane
+    } else if (face == 1) {
+        // clip left plane
+    } else if (face == 2) {
+        // clip top plane
+    } else if (face == 3) {
+        // clip bottom plane
+    } else if (face == 4) {
+        // clip far plane
+    } else {
+        // clip near plane
+    }
     clip_triangle(state,in,face+1);
 }
 
