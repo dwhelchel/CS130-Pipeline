@@ -145,12 +145,12 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     // New data geometries
     const data_geometry * geo[3];
     const data_geometry * geo2[3];
-    data_geometry dg1 = in[0];
-    data_geometry dg2 = in[1];
-    data_geometry dg3 = in[2];
-    data_geometry dg_1 = in[0];
-    data_geometry dg_2 = in[1];
-    data_geometry dg_3 = in[2];
+    data_geometry dg1 = *in[0];
+    data_geometry dg2 = *in[1];
+    data_geometry dg3 = *in[2];
+    data_geometry dg_1 = *in[0];
+    data_geometry dg_2 = *in[1];
+    data_geometry dg_3 = *in[2];
 
     // True = inside, false = outside
     if (sign) {
