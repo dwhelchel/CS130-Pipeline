@@ -131,9 +131,9 @@ void render(driver_state& state, render_type type)
     // std::cout<<"TODO: implement rendering."<<std::endl;
 }
 
-int generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
+vec4 generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
 
-    int alpha = 0;
+    vec4 alpha;
 
     if (sign) {
         alpha = (in[b]->gl_Position[3] - in[b]->gl_Position[position])
@@ -155,8 +155,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     bool vertexB = false;
     bool vertexC = false;
 
-    int alpha_0;
-    int alpha_1;
+    vec4 alpha_0;
+    vec4 alpha_1;
 
     // New data geometries
     const data_geometry * geo[3];
