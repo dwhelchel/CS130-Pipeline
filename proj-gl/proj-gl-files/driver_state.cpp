@@ -131,9 +131,9 @@ void render(driver_state& state, render_type type)
     // std::cout<<"TODO: implement rendering."<<std::endl;
 }
 
-vec4 generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
+int generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
 
-    vec4 alpha;
+    int alpha;
 
     if (sign) {
         alpha = (in[b]->gl_Position[3] - in[b]->gl_Position[position])
@@ -155,18 +155,21 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     bool vertexB = false;
     bool vertexC = false;
 
-    vec4 alpha_0;
-    vec4 alpha_1;
+    int alpha_0;
+    int alpha_1;
 
     // New data geometries
     const data_geometry * geo[3];
     const data_geometry * geo2[3];
-    data_geometry dg1 = *in[0];
-    data_geometry dg2 = *in[1];
-    data_geometry dg3 = *in[2];
-    data_geometry dg_1 = *in[0];
-    data_geometry dg_2 = *in[1];
-    data_geometry dg_3 = *in[2];
+    data_geometry dg1;
+    data_geometry dg2;
+    data_geometry dg3;
+    data_geometry dg_1;
+
+    dg1.data = new float[state.floats_per_vertex];
+    dg2.data = new float[state.floats_per_vertex];
+    dg3.data = new float[state.floats_per_vertex];
+    dg_1.data = new float[state.floats_per_vertex];
 
     // True = inside, false = outside
     if (sign) {
@@ -190,8 +193,12 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 1, 2);
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
-        vec4 position_0 = (alpha_0 * in[1]->gl_Position[position]) + ((1 - alpha_0) * in[2]->gl_Position[position]);
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]);
+        vec4 position_0 = (alpha_0 * in[1]->gl_Position) + ((1 - alpha_0) * in[2]->gl_Position); // bc
+        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+
+        dg1.gl_Position = in[2]->gl_Position;
+        dg2.gl_Position = position_1;
+        dg3.gl_Position = position_0;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -224,8 +231,12 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
         alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position[position]) + ((1 - alpha_0) * in[1]->gl_Position[position]); // ab
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]); // bc
+        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
+        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // bc
+
+        dg1.gl_Position = in[1]->gl_Position
+        dg2.gl_Position = position_1;
+        dg3.gl_Position = position_0;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -258,8 +269,13 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1); // ab
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2); // ac
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position[position]) + ((1 - alpha_0) * in[1]->gl_Position[position]); // ab
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]); // ac
+        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
+        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+
+        dg1.gl_Position = in[1]->gl_Position;
+        dg2.gl_Position = position_1;
+        dg3.gl_Position = position_0;
+        dg_1.gl_Position = in[2]->gl_Position;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -298,8 +314,12 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position[position]) + ((1 - alpha_0) * in[1]->gl_Position[position]); // ab
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]); // ac
+        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
+        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+
+        dg1.gl_Position = in[0]->gl_Position;
+        dg2.gl_Position = position_0;
+        dg3.gl_Position = position_1;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -332,8 +352,13 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
         alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position[position]) + ((1 - alpha_0) * in[1]->gl_Position[position]); // ab
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]); // bc
+        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
+        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // bc
+
+        dg1.gl_Position = in[2]->gl_Position;
+        dg2.gl_Position = position_0;
+        dg3.gl_Position = position_1;
+        dg_1.gl_Position = in[0]->gl_Position;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -375,8 +400,13 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 2);
         alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position[position]) + ((1 - alpha_0) * in[2]->gl_Position[position]);
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position[position]) + ((1 - alpha_1) * in[2]->gl_Position[position]);
+        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[2]->gl_Position);
+        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position);
+
+        dg1.gl_Position = in[0]->gl_Position;
+        dg2.gl_Position = position_1;
+        dg3.gl_Position = position_0;
+        dg_1.gl_Position = in[1]->gl_Position;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -410,6 +440,12 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
 
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo, face+1);
+
+        delete [] dg1.data;
+        delete [] dg2.data;
+        delete [] dg3.data;
+        delete [] dg_1.data;
+
     }
 
 }
