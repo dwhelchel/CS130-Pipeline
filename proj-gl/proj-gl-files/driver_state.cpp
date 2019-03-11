@@ -99,8 +99,8 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
                 // Rasterize the triangle with state and new vertex array
-                rasterize_triangle(state, geo);
-                // clip_triangle(state, geo, 0);
+                // rasterize_triangle(state, geo);
+                clip_triangle(state, geo, 0);
 
             }
 
@@ -150,7 +150,7 @@ float generate_alpha(driver_state& state, bool sign, int position, const data_ge
 // Checks to see if vertices of the triangle are on opposite sides
 void check_vertices(driver_state& state, bool sign, int position, const data_geometry* in[3], int face) {
 
-    // Keep track of in and out vertices
+    // True = inside, false = outside
     bool vertexA = false;
     bool vertexB = false;
     bool vertexC = false;
@@ -171,15 +171,14 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     dg3.data = new float[state.floats_per_vertex];
     dg_1.data = new float[state.floats_per_vertex];
 
-    // True = inside, false = outside
     if (sign) {
         if (in[0]->gl_Position[position] <= in[0]->gl_Position[3]) vertexA = true;
         if (in[1]->gl_Position[position] <= in[1]->gl_Position[3]) vertexB = true;
         if (in[2]->gl_Position[position] <= in[2]->gl_Position[3]) vertexC = true;
     } else {
-        if (in[0]->gl_Position[position] >= in[0]->gl_Position[3]) vertexA = true;
-        if (in[1]->gl_Position[position] >= in[1]->gl_Position[3]) vertexB = true;
-        if (in[2]->gl_Position[position] >= in[2]->gl_Position[3]) vertexC = true;
+        if (in[0]->gl_Position[position] >= -1 * in[0]->gl_Position[3]) vertexA = true;
+        if (in[1]->gl_Position[position] >= -1 * in[1]->gl_Position[3]) vertexB = true;
+        if (in[2]->gl_Position[position] >= -1 * in[2]->gl_Position[3]) vertexC = true;
     }
 
     // If all inside nothing to clip against this plane
@@ -442,6 +441,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         // clip_triangle(state, geo, face+1);
 
     }
+
+    delete [] dg_1.data;
 
 }
 
