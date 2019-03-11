@@ -335,7 +335,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
                 float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
                 float ab_noperspective = alpha_0 * in[2]->gl_Position[3] * ab_w;
-                float bc_noperspective = alpha_1 * in[2]->gl_Position[3] * ac_w;
+                float bc_noperspective = alpha_1 * in[2]->gl_Position[3] * bc_w;
                 dg2.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
                 dg3.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
             }
@@ -349,7 +349,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         // Second triangle
         geo2[0] = &dg1;
         geo2[1] = &dg_1;
-        geo3[2] = &dg2;
+        geo2[2] = &dg2;
 
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo2, face+1);
@@ -378,7 +378,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
                 float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
                 float ab_noperspective = alpha_0 * in[0]->gl_Position[3] * ab_w;
-                float bc_noperspective = alpha_1 * in[0]->gl_Position[3] * ac_w;
+                float bc_noperspective = alpha_1 * in[0]->gl_Position[3] * bc_w;
                 dg2.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
                 dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[2]->data[i];
             }
