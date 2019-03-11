@@ -171,8 +171,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     // For middle cases
     // A, B outside C inside
     if (!vertexA && !vertexB && vertexC) { // bc, ca ; call once
-        alpha_0 = generate_alpha(state, sign, position, in, face, 1, 2);
-        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 1, 2);
+        alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
         vec4 position_0 = alpha_0 * in[1]->gl_Position[position] + (1 - alpha_0) * in[2]->gl_Position[position];
         vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position];
@@ -205,8 +205,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A, C outside B inside
     if (!vertexA && vertexB && !vertexC) { // ab, bc ; call once
-        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
-        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
         vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // bc
@@ -239,8 +239,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A outside B, C inside
     if (!vertexA && vertexB && vertexC) { // ab, ca ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1); // ab
-        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2); // ac
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 1); // ab
+        alpha_1 = generate_alpha(state, sign, position, in, 0, 2); // ac
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
         vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // ac
@@ -279,8 +279,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A inside B, C outside
     if (vertexA && !vertexB && !vertexC) { // ab, ca ; call once
-        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
-        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
         vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // ac
@@ -313,8 +313,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A, C inside B outside
     if (vertexA && !vertexB && vertexC) { // bc, ab ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
-        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
         vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // bc
@@ -356,8 +356,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A, B inside C outside
     if (vertexA && vertexB && !vertexC) { // ca, bc ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 2);
-        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 2);
+        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[2]->gl_Position[position];
         vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position];
