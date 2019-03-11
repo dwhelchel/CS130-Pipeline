@@ -443,10 +443,10 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
 
     }
 
-    delete [] dg1.data;
-    delete [] dg2.data;
-    delete [] dg3.data;
-    delete [] dg_1.data;
+    // delete [] dg1.data;
+    // delete [] dg2.data;
+    // delete [] dg3.data;
+    // delete [] dg_1.data;
 
 }
 
