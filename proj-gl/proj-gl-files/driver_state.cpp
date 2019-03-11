@@ -131,6 +131,22 @@ void render(driver_state& state, render_type type)
     // std::cout<<"TODO: implement rendering."<<std::endl;
 }
 
+float generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
+
+    float alpha = 0;
+
+    if (sign) {
+        alpha = (in[b]->gl_Position[3] - in[b]->gl_Position[position])
+                / (in[a]->gl_Position[position] - in[a]->gl_Position[3] + in[b]->gl_Position[3] - in[b]->gl_Position[position]);
+    } else {
+        alpha = (-1 * in[b]->gl_Position[3] - in[b]->gl_Position[position])
+                / (in[a]->gl_Position[position] + in[a]->gl_Position[3] - in[b]->gl_Position[3] - in[b]->gl_Position[position]);
+    }
+
+    return alpha;
+
+}
+
 // Checks to see if vertices of the triangle are on opposite sides
 void check_vertices(driver_state& state, bool sign, int position, const data_geometry* in[3], int face) {
 
@@ -395,22 +411,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo, face+1);
     }
-
-}
-
-float generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
-
-    float alpha = 0;
-
-    if (sign) {
-        alpha = (in[b]->gl_Position[3] - in[b]->gl_Position[position])
-                / (in[a]->gl_Position[position] - in[a]->gl_Position[3] + in[b]->gl_Position[3] - in[b]->gl_Position[position]);
-    } else {
-        alpha = (-1 * in[b]->gl_Position[3] - in[b]->gl_Position[position])
-                / (in[a]->gl_Position[position] + in[a]->gl_Position[3] - in[b]->gl_Position[3] - in[b]->gl_Position[position]);
-    }
-
-    return alpha;
 
 }
 
