@@ -99,8 +99,8 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
                 // Rasterize the triangle with state and new vertex array
-                rasterize_triangle(state, geo);
-                // clip_triangle(state, geo, 0);
+                // rasterize_triangle(state, geo);
+                clip_triangle(state, geo, 0);
 
             }
 
@@ -131,6 +131,288 @@ void render(driver_state& state, render_type type)
     // std::cout<<"TODO: implement rendering."<<std::endl;
 }
 
+// Checks to see if vertices of the triangle are on opposite sides
+void check_vertices(driver_state& state, bool sign, int position, const data_geometry* in[3], int face) {
+
+    // Keep track of in and out vertices
+    bool vertexA = false;
+    bool vertexB = false;
+    bool vertexC = false;
+
+    float alpha_0;
+    float alpha_1;
+
+    // New data geometries
+    const data_geometry * geo[3];
+    const data_geometry * geo2[3];
+    data_geometry dg1 = in[0];
+    data_geometry dg2 = in[1];
+    data_geometry dg3 = in[2];
+    data_geometry dg_1 = in[0];
+    data_geometry dg_2 = in[1];
+    data_geometry dg_3 = in[2];
+
+    // True = inside, false = outside
+    if (sign) {
+        if (in[0]->gl_Position[position] <= in[0]->gl_Position[3]) vertexA = true;
+        if (in[1]->gl_Position[position] <= in[1]->gl_Position[3]) vertexB = true;
+        if (in[2]->gl_Position[position] <= in[2]->gl_Position[3]) vertexC = true;
+    } else {
+        if (in[0]->gl_Position[position] >= in[0]->gl_Position[3]) vertexA = true;
+        if (in[1]->gl_Position[position] >= in[1]->gl_Position[3]) vertexB = true;
+        if (in[2]->gl_Position[position] >= in[2]->gl_Position[3]) vertexC = true;
+    }
+
+    // If all inside nothing to clip against this plane
+    if (vertexA && vertexB && vertexC) {
+        clip_triangle(state, in, face+1);
+    }
+
+    // For middle cases
+    // A, B outside C inside
+    if (!vertexA && !vertexB && vertexC) { // bc, ca ; call once
+        alpha_0 = generate_alpha(state, sign, position, in, face, 1, 2);
+        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2);
+
+        vec4 position_0 = alpha_0 * in[1]->gl_Position[position] + (1 - alpha_0) * in[2]->gl_Position[position];
+        vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position];
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[2]->data;
+                dg2.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
+                dg3.data[i] = alpha_0 * in[1]->data[i] + (1 - alpha_0) * in[2]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[2]->data;
+                float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float bc_noperspective = alpha_0 * in[2]->gl_Position[3] * bc_w;
+                float ac_noperspective = alpha_1 * in[2]->gl_Position[3] * ac_w;
+                dg2.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
+                dg3.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+            }
+        }
+
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        clip_triangle(state, geo, face+1);
+    }
+    // A, C outside B inside
+    if (!vertexA && vertexB && !vertexC) { // ab, bc ; call once
+        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+
+        vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
+        vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // bc
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[1]->data;
+                dg2.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
+                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[1]->data;
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ab_noperspective = alpha_0 * in[1]->gl_Position[3] * ab_w;
+                float bc_noperspective = alpha_1 * in[1]->gl_Position[3] * bc_w;
+                dg2.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+            }
+        }
+
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        clip_triangle(state, geo, face+1);
+    }
+    // A outside B, C inside
+    if (!vertexA && vertexB && vertexC) { // ab, ca ; call twice
+        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1); // ab
+        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2); // ac
+
+        vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
+        vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // ac
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[1]->data;
+                dg_1.data = in[2]->data;
+                dg2.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
+                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[1]->data;
+                dg_1.data = in[2]->data;
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
+                float ab_noperspective = alpha_0 * in[1]->gl_Position[3] * ab_w;
+                float ac_noperspective = alpha_1 * in[1]->gl_Position[3] * ac_w;
+                dg2.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
+                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+            }
+        }
+
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+        geo2[0] = &dg1;
+        geo2[1] = &dg_1;
+        geo2[2] = &dg2;
+
+        clip_triangle(state, geo, face+1);
+        clip_triangle(state, geo2, face+1);
+    }
+    // A inside B, C outside
+    if (vertexA && !vertexB && !vertexC) { // ab, ca ; call once
+        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, face, 0, 2);
+
+        vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
+        vec4 position_1 = alpha_1 * in[0]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // ac
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[0]->data;
+                dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+                dg3.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[0]->data;
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ab_noperspective = alpha_0 * in[0]->gl_Position[3] * ab_w;
+                float ac_noperspective = alpha_1 * in[0]->gl_Position[3] * ac_w;
+                dg2.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+                dg3.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
+            }
+        }
+
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        clip_triangle(state, geo, face+1);
+    }
+    // A, C inside B outside
+    if (vertexA && !vertexB && vertexC) { // bc, ab ; call twice
+        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 1);
+        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+
+        vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[1]->gl_Position[position]; // ab
+        vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position]; // bc
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[2]->data;
+                dg_1.data = in[0]->data;
+                dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+                dg3.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[2]->data;
+                dg_1.data = in[0]->data;
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ab_noperspective = alpha_0 * in[2]->gl_Position[3] * ab_w;
+                float bc_noperspective = alpha_1 * in[2]->gl_Position[3] * ac_w;
+                dg2.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+                dg3.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+            }
+        }
+
+        // first triangle
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        // Second triangle
+        geo2[0] = &dg1;
+        geo2[1] = &dg_1;
+        geo3[2] = &dg2;
+
+        clip_triangle(state, geo, face+1);
+        clip_triangle(state, geo2, face+1);
+    }
+    // A, B inside C outside
+    if (vertexA && vertexB && !vertexC) { // ca, bc ; call twice
+        alpha_0 = generate_alpha(state, sign, position, in, face, 0, 2);
+        alpha_1 = generate_alpha(state, sign, position, in, face, 1, 2);
+
+        vec4 position_0 = alpha_0 * in[0]->gl_Position[position] + (1 - alpha_0) * in[2]->gl_Position[position];
+        vec4 position_1 = alpha_1 * in[1]->gl_Position[position] + (1 - alpha_1) * in[2]->gl_Position[position];
+
+        for (int i = 0; i < state.floats_per_vertex; ++i) {
+            if (state.interp_rules[i] == interp_type::flat) {
+                dg1.data = in[0]->data;
+                dg2.data = in[0]->data;
+                dg3.data = in[0]->data;
+            } else if (state.interp_rules[i] == interp_type::smooth) {
+                dg1.data = in[0]->data;
+                dg_1.data = in[1]->data;
+                dg2.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
+                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[2]->data[i];
+            } else if (state.interp_rules[i] == interp_type::noperspective) {
+                dg1.data = in[0]->data;
+                dg_1.data = in[1]->data;
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ab_noperspective = alpha_0 * in[0]->gl_Position[3] * ab_w;
+                float bc_noperspective = alpha_1 * in[0]->gl_Position[3] * ac_w;
+                dg2.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[2]->data[i];
+            }
+        }
+
+        geo[0] = &dg1;
+        geo[1] = &dg2;
+        geo[2] = &dg3;
+
+        geo2[0] = &dg1;
+        geo2[1] = &dg_1;
+        geo2[2] = &dg2;
+
+        clip_triangle(state, geo, face+1);
+        clip_triangle(state, geo, face+1);
+    }
+
+}
+
+float generate_alpha(driver_state& state, bool sign, int position, const data_geometry* in[3], int a, int b) {
+
+    float alpha = 0;
+
+    if (sign) {
+        alpha = (in[b]->gl_Position[3] - in[b]->gl_Position[position])
+                / (in[a]->gl_Position[position] - in[a]->gl_Position[3] + in[b]->gl_Position[3] - in[b]->gl_Position[position]);
+    } else {
+        alpha = (-1 * in[b]->gl_Position[3] - in[b]->gl_Position[position])
+                / (in[a]->gl_Position[position] + in[a]->gl_Position[3] - in[b]->gl_Position[3] - in[b]->gl_Position[position]);
+    }
+
+    return alpha;
+
+}
 
 // This function clips a triangle (defined by the three vertices in the "in" array).
 // It will be called recursively, once for each clipping face (face=0, 1, ..., 5) to
@@ -143,21 +425,47 @@ void clip_triangle(driver_state& state, const data_geometry* in[3],int face)
         rasterize_triangle(state, in);
         return;
     }
-    // std::cout<<"TODO: implement clipping. (The current code passes the triangle through without clipping them.)"<<std::endl;
+
+    // True = inside, false = outside
+    bool sign = false;
+    int position = 0;
+
+    // clip right plane (+1)
     if (face == 0) {
-        // clip right plane
-    } else if (face == 1) {
-        // clip left plane
-    } else if (face == 2) {
-        // clip top plane
-    } else if (face == 3) {
-        // clip bottom plane
-    } else if (face == 4) {
-        // clip far plane
-    } else {
-        // clip near plane
+        sign = true;
+        position = 0;
+        check_vertices(state, sign, position, in, face);
     }
-    clip_triangle(state,in,face+1);
+    // clip left plane (-1)
+    else if (face == 1) {
+        sign = false;
+        position = 0;
+        check_vertices(state, sign, position, in, face);
+    }
+    // clip top plane (+1)
+    else if (face == 2) {
+        sign = true;
+        position = 1;
+        check_vertices(state, sign, position, in, face);
+    }
+    // clip bottom plane (-1)
+    else if (face == 3) {
+        sign = false;
+        position = 1;
+        check_vertices(state, sign, position, in, face);
+    }
+    // clip far plane (+1)
+    else if (face == 4) {
+        sign = true;
+        position = 2;
+        check_vertices(state, sign, position, in, face);
+    }
+    // clip near plane (-1)
+    else if (face == 5){
+        sign = false;
+        position = 2;
+        check_vertices(state, sign, position, in, face);
+    }
 }
 
 // Rasterize the triangle defined by the three vertices in the "in" array.  This
