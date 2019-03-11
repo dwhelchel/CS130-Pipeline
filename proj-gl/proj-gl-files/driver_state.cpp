@@ -441,7 +441,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         clip_triangle(state, geo, face+1);
     }
 
-    delete [] dg_1.data;
+    // delete [] dg_1.data;
 
 }
 
