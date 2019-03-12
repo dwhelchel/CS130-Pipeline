@@ -164,7 +164,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     data_geometry dg1;
     data_geometry dg2;
     data_geometry dg3;
-    data_geometry dg_1;
 
     dg1.data = new float[state.floats_per_vertex];
     dg2.data = new float[state.floats_per_vertex];
@@ -189,15 +188,15 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     // For middle cases
     // A, B outside C inside
     if (!vertexA && !vertexB && vertexC) { // bc, ca ; call once
-        alpha_0 = generate_alpha(state, sign, position, in, 1, 2);
-        alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 2, 0);
+        alpha_1 = generate_alpha(state, sign, position, in, 2, 1);
 
-        vec4 position_0 = (alpha_0 * in[1]->gl_Position) + ((1 - alpha_0) * in[2]->gl_Position); // bc
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+        vec4 position_0 = alpha_0 * in[2]->gl_Position + (1 - alpha_0) * in[0]->gl_Position; // ca
+        vec4 position_1 = alpha_1 * in[2]->gl_Position + (1 - alpha_1) * in[1]->gl_Position; // cb
 
         dg1.gl_Position = in[2]->gl_Position;
-        dg2.gl_Position = position_1;
-        dg3.gl_Position = position_0;
+        dg2.gl_Position = position_0;
+        dg3.gl_Position = position_1;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -206,16 +205,16 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg3.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[2]->data;
-                dg2.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
-                dg3.data[i] = alpha_0 * in[1]->data[i] + (1 - alpha_0) * in[2]->data[i];
+                dg2.data[i] = alpha_0 * in[2]->data * (1 - alpha_0) * in[0]->data; // ca
+                dg3.data[i] = alpha_1 * in[2]->data * (1 - alpha_1) * in[1]->data; // cb
             } else if (state.interp_rules[i] == interp_type::noperspective) {
+                float ca_w = 1.0 / (alpha_0 * in[2]->gl_Position[3] + (1 - alpha_0) * in[0]->gl_Position[3]);
+                float cb_w = 1.0 / (alpha_1 * in[2]->gl_Position[3] + (1 - alpha_1) * in[1]->gl_Position[3]);
+                float ca_nonalpha = alpha_0 * in[2]->gl_Position[3] * ca_w;
+                float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
-                float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float bc_noperspective = alpha_0 * in[2]->gl_Position[3] * bc_w;
-                float ac_noperspective = alpha_1 * in[2]->gl_Position[3] * ac_w;
-                dg2.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
-                dg3.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+                dg2.data = ca_nonalpha * in[2]->data + (1 - ca_nonalpha) * in[0]->data;
+                dg3.dats = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
             }
         }
 
@@ -227,15 +226,15 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A, C outside B inside
     if (!vertexA && vertexB && !vertexC) { // ab, bc ; call once
-        alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
-        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 1, 2); // bc
+        alpha_1 = generate_alpha(state, sign, position, in, 1, 0); // ba
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // bc
+        vec4 position_0 = alpha_0 * in[1]->gl_Position + (1 - alpha_0) * in[2]->gl_Position; //bc
+        vec4 position_1 = alpha_1 * in[1]->gl_Position + (1 - alpha_1) * in[0]->gl_Position; //ba
 
-        dg1.gl_Position = in[1]->gl_Position;
-        dg2.gl_Position = position_1;
-        dg3.gl_Position = position_0;
+        dg1.gl_Position = in[1]->gl_Position; // b position
+        dg2.gl_Position = position_0; // bc position
+        dg3.gl_Position = position_1; // ba position
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
@@ -244,16 +243,16 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg3.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[1]->data;
-                dg2.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
-                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+                dg2.data[i] = alpha_0 * in[1]->data + (1 - alpha_0) * in[2]->data;
+                dg3.data[i] = alpha_1 * in[1]->data + (1 - alpha_1) * in[0]->data;
             } else if (state.interp_rules[i] == interp_type::noperspective) {
+                float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ba_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_1) * in[0]->gl_Position[3]);
+                float bc_nonalpha = alpha_0 * in[1]->gl_Position[3] * bc_w;
+                float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
-                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
-                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float ab_noperspective = alpha_0 * in[1]->gl_Position[3] * ab_w;
-                float bc_noperspective = alpha_1 * in[1]->gl_Position[3] * bc_w;
-                dg2.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
-                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+                dg2.data = bc_nonalpha * in[1]->data + (1 - bc_nonalpha) * in[2]->data;
+                dg3.data = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
             }
         }
 
@@ -265,15 +264,15 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A outside B, C inside
     if (!vertexA && vertexB && vertexC) { // ab, ca ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, 0, 1); // ab
-        alpha_1 = generate_alpha(state, sign, position, in, 0, 2); // ac
+        alpha_0 = generate_alpha(state, sign, position, in, 2, 0); //ca
+        alpha_1 = generate_alpha(state, sign, position, in, 1, 0); //ba
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+        vec4 position_0 = alpha_0 * in[2]->gl_Position + (1 - alpha_0) * in[0]->gl_Position; // ca
+        vec4 position_1 = alpha_1 * in[1]->gl_Position + (1 - alpha_1) * in[0]->gl_Position; // ba
 
         dg1.gl_Position = in[1]->gl_Position;
-        dg2.gl_Position = position_1;
-        dg3.gl_Position = position_0;
+        dg2.gl_Position = position_0;
+        dg3.gl_Position = position_1;
         dg_1.gl_Position = in[2]->gl_Position;
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
@@ -281,29 +280,31 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg1.data = in[0]->data;
                 dg2.data = in[0]->data;
                 dg3.data = in[0]->data;
+                dg_1.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[1]->data;
-                dg_1.data = in[2]->data;
-                dg2.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
-                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
+                dg1.data = in[1]->data; // b data
+                dg_1.data = in[2]->data; // c data
+                dg2.data[i] = alpha_0 * in[2]->data + (1 - alpha_0) * in[0]->data;
+                dg3.data[i] = alpha_1 * in[1]->data + (1 - alpha_1) * in[0]->data;
             } else if (state.interp_rules[i] == interp_type::noperspective) {
+                float ca_w = 1.0 / (alpha_0 * in[2]->gl_Position[3] + (1 - alpha_0) * in[0]->gl_Position[3]);
+                float ba_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_1) * in[0]->gl_Position[3]);
+                float ca_noalpha = alpha_0 * in[2]->gl_Position[3] * ca_w;
+                float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
                 dg_1.data = in[2]->data;
-                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
-                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
-                float ab_noperspective = alpha_0 * in[1]->gl_Position[3] * ab_w;
-                float ac_noperspective = alpha_1 * in[1]->gl_Position[3] * ac_w;
-                dg2.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
-                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
+                dg2.data = ca_noalpha * in[2]->data + (1 - ca_noalpha) * in[0]->data;
+                dg3.data = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
             }
         }
 
-        geo[0] = &dg1;
-        geo[1] = &dg2;
-        geo[2] = &dg3;
-        geo2[0] = &dg1;
-        geo2[1] = &dg_1;
-        geo2[2] = &dg2;
+        geo[0] = &dg1; // b
+        geo[1] = &dg2; // ca
+        geo[2] = &dg3; // ba
+
+        geo2[0] = &dg1; // b
+        geo2[1] = &dg_1; // c
+        geo2[2] = &dg2; // ca
 
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo2, face+1);
@@ -313,8 +314,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
-        vec4 position_1 = (alpha_1 * in[0]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // ac
+        vec4 position_0 = alpha_0 * in[0]->gl_Position + (1 - alpha_0) * in[1]->gl_Position; // ab
+        vec4 position_1 = alpha_1 * in[0]->gl_Position + (1 - alpha_1) * in[2]->gl_Position; // ac
 
         dg1.gl_Position = in[0]->gl_Position;
         dg2.gl_Position = position_0;
@@ -326,17 +327,17 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg2.data = in[0]->data;
                 dg3.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[0]->data;
+                dg1.data = in[0]->data; // a data
                 dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
                 dg3.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
             } else if (state.interp_rules[i] == interp_type::noperspective) {
-                dg1.data = in[0]->data;
                 float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
-                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float ab_noperspective = alpha_0 * in[0]->gl_Position[3] * ab_w;
-                float ac_noperspective = alpha_1 * in[0]->gl_Position[3] * ac_w;
-                dg2.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
-                dg3.data[i] = ac_noperspective * in[0]->data[i] + (1 - ac_noperspective) * in[2]->data[i];
+                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
+                float ab_nonalpha = alpha_0 * in[0]->gl_Position[3] * ab_w;
+                float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
+                dg1.data = in[0]->data;
+                dg2.data = ab_nonalpha * in[0]->data + (1 - ab_nonalpha) * in[1]->data;
+                dg3.data = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
             }
         }
 
@@ -348,100 +349,98 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     }
     // A, C inside B outside
     if (vertexA && !vertexB && vertexC) { // bc, ab ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
-        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 0, 1); //ab
+        alpha_1 = generate_alpha(state, sign, position, in, 2, 1); //cb
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[1]->gl_Position); // ab
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position); // bc
+        vec4 position_0 = alpha_0 * in[0]->gl_Position + (1 - alpha_0) * in[1]->gl_Position; // ab
+        vec4 position_1 = alpha_1 * in[2]->gl_Position + (1 - alpha_1) * in[1]->gl_Position; // cb
 
-        dg1.gl_Position = in[2]->gl_Position;
-        dg2.gl_Position = position_0;
-        dg3.gl_Position = position_1;
-        dg_1.gl_Position = in[0]->gl_Position;
+        dg1.gl_Position = in[2]->gl_Position; // c position
+        dg2.gl_Position = position_0; // ab
+        dg3.gl_Position = position_1; // cb
+        dg_1.gl_Position = in[0]->gl_Position; // a
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
                 dg1.data = in[0]->data;
                 dg2.data = in[0]->data;
                 dg3.data = in[0]->data;
+                dg_1.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[2]->data;
-                dg_1.data = in[0]->data;
-                dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
-                dg3.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
+                dg1.data = in[2]->data; // c data
+                dg_1.data = in[0]->data; // a data
+                dg2.data[i] = alpha_0 * in[0]->data + (1 - alpha_0) * in[1]->data; //ab
+                dg3.data[i] = alpha_1 * in[2]->data + (1 - alpha_1) * in[1]->data; //cb
             } else if (state.interp_rules[i] == interp_type::noperspective) {
+                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
+                float cb_w = 1.0 / (alpha_1 * in[2]->gl_Position[3] + (1 - alpha_1) * in[1]->gl_Position[3]);
+                float ab_noalpha = alpha_0 * in[0]->gl_Position[3] * ab_w;
+                float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
                 dg_1.data = in[0]->data;
-                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
-                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float ab_noperspective = alpha_0 * in[2]->gl_Position[3] * ab_w;
-                float bc_noperspective = alpha_1 * in[2]->gl_Position[3] * bc_w;
-                dg2.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[1]->data[i];
-                dg3.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
+                dg2.data = ca_noalpha * in[0]->data + (1 - ca_noalpha) * in[1]->data;
+                dg3.data = ba_nonalpha * in[2]->data + (1 - ba_nonalpha) * in[1]->data;
             }
         }
 
-        // first triangle
-        geo[0] = &dg1;
-        geo[1] = &dg2;
-        geo[2] = &dg3;
+        geo[0] = &dg1; // c
+        geo[1] = &dg2; // ab
+        geo[2] = &dg3; // cb
 
-        // Second triangle
-        geo2[0] = &dg1;
-        geo2[1] = &dg_1;
-        geo2[2] = &dg2;
+        geo2[0] = &dg1; // c
+        geo2[1] = &dg_1; // a
+        geo2[2] = &dg2; // ab
 
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo2, face+1);
     }
     // A, B inside C outside
     if (vertexA && vertexB && !vertexC) { // ca, bc ; call twice
-        alpha_0 = generate_alpha(state, sign, position, in, 0, 2);
-        alpha_1 = generate_alpha(state, sign, position, in, 1, 2);
+        alpha_0 = generate_alpha(state, sign, position, in, 1, 2); // bc
+        alpha_1 = generate_alpha(state, sign, position, in, 0, 2); // ac
 
-        vec4 position_0 = (alpha_0 * in[0]->gl_Position) + ((1 - alpha_0) * in[2]->gl_Position);
-        vec4 position_1 = (alpha_1 * in[1]->gl_Position) + ((1 - alpha_1) * in[2]->gl_Position);
+        vec4 position_0 = alpha_0 * in[1]->gl_Position + (1 - alpha_0) * in[2]->gl_Position; // bc
+        vec4 position_1 = alpha_1 * in[0]->gl_Position + (1 - alpha_1) * in[2]->gl_Position; // ac
 
-        dg1.gl_Position = in[0]->gl_Position;
-        dg2.gl_Position = position_1;
-        dg3.gl_Position = position_0;
-        dg_1.gl_Position = in[1]->gl_Position;
+        dg1.gl_Position = in[0]->gl_Position; // a position
+        dg2.gl_Position = position_0; // bc
+        dg3.gl_Position = position_1; // ac
+        dg_1.gl_Position = in[1]->gl_Position; // b
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
                 dg1.data = in[0]->data;
                 dg2.data = in[0]->data;
                 dg3.data = in[0]->data;
+                dg_1.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[0]->data;
-                dg_1.data = in[1]->data;
-                dg2.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[2]->data[i];
-                dg3.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[2]->data[i];
+                dg1.data = in[0]->data; // a data
+                dg_1.data = in[1]->data; // b data
+                dg2.data[i] = alpha_0 * in[1]->data + (1 - alpha_0) * in[2]->data; // bc
+                dg3.data[i] = alpha_1 * in[0]->data + (1 - alpha_1) * in[2]->data; // ac
             } else if (state.interp_rules[i] == interp_type::noperspective) {
+                float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
+                float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
+                float bc_noalpha = alpha_0 * in[1]->gl_Position[3] * bc_w;
+                float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
                 dg_1.data = in[1]->data;
-                float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
-                float bc_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
-                float ab_noperspective = alpha_0 * in[0]->gl_Position[3] * ab_w;
-                float bc_noperspective = alpha_1 * in[0]->gl_Position[3] * bc_w;
-                dg2.data[i] = bc_noperspective * in[1]->data[i] + (1 - bc_noperspective) * in[2]->data[i];
-                dg3.data[i] = ab_noperspective * in[0]->data[i] + (1 - ab_noperspective) * in[2]->data[i];
+                dg2.data = bc_noalpha * in[1]->data + (1 - bc_noalpha) * in[2]->data;
+                dg3.data = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
             }
         }
 
-        geo[0] = &dg1;
-        geo[1] = &dg2;
-        geo[2] = &dg3;
+        geo[0] = &dg1; // a
+        geo[1] = &dg2; // bc
+        geo[2] = &dg3; // ac
 
-        geo2[0] = &dg1;
-        geo2[1] = &dg_1;
-        geo2[2] = &dg2;
+        geo2[0] = &dg1; // a
+        geo2[1] = &dg_1; // b
+        geo2[2] = &dg2; // bc
 
         clip_triangle(state, geo, face+1);
         clip_triangle(state, geo, face+1);
     }
-
-    // delete [] dg_1.data;
 
 }
 
