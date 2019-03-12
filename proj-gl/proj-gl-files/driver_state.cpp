@@ -416,7 +416,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg2.data[i] = in[1]->data[i];
                 dg3.data[i] = in[2]->data[i];
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[0]->data; // a data
+                dg1.data[i] = in[0]->data[i]; // a data
                 dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i];
                 dg3.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i];
             } else if (state.interp_rules[i] == interp_type::noperspective) {
@@ -451,7 +451,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
-                dg1.data = in[2]->data;
+                dg1.data[i] = in[2]->data[i];
                 dg2.data[i] = in[1]->data[i];
                 dg3.data[i] = in[1]->data[i];
                 dg_1.data = in[0]->data;
@@ -498,13 +498,13 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
 
         for (int i = 0; i < state.floats_per_vertex; ++i) {
             if (state.interp_rules[i] == interp_type::flat) {
-                dg1.data = in[0]->data;
+                dg1.data[i] = in[0]->data[i];
                 dg2.data[i] = in[2]->data[i];
                 dg3.data[i] = in[2]->data[i];
                 dg_1.data = in[1]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
-                dg1.data = in[0]->data; // a data
-                dg_1.data = in[1]->data; // b data
+                dg1.data[i] = in[0]->data[i]; // a data
+                dg_1.data[i] = in[1]->data[i]; // b data
                 dg2.data[i] = alpha_0 * in[1]->data[i] + (1 - alpha_0) * in[2]->data[i]; // bc
                 dg3.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i]; // ac
             } else if (state.interp_rules[i] == interp_type::noperspective) {
