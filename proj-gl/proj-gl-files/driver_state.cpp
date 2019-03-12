@@ -157,12 +157,21 @@ void render(driver_state& state, render_type type)
         {
 
             const data_geometry * geo[3];
-            data_geometry dg1;
-            data_geometry dg2;
-            data_geometry dg3;
-            data_vertex dv1;
-            data_vertex dv2;
-            data_vertex dv3;
+            data_geometry dg[3];
+            data_vertex dv[3];
+
+            for (int i = 0; i < state.num_vertices; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    int flag = i + j;
+                    if (j > 0) {
+                        dv[i].data = state.vertex_data + flag * state.floats_per_vertex;
+                        dg[i].data = dv[i].data;
+                        state.vertex_shader(dv[i], dg[i], state.uniform_data);
+                        geo[i] = &dg[i];
+                    }
+                }
+                clip_triangle(state, geo, 0);
+            }
 
         }
         break;
