@@ -164,6 +164,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     data_geometry dg1;
     data_geometry dg2;
     data_geometry dg3;
+    data_geometry dg_1;
 
     dg1.data = new float[state.floats_per_vertex];
     dg2.data = new float[state.floats_per_vertex];
@@ -213,8 +214,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ca_nonalpha = alpha_0 * in[2]->gl_Position[3] * ca_w;
                 float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
-                dg2.data = ca_nonalpha * in[2]->data + (1 - ca_nonalpha) * in[0]->data;
-                dg3.dats = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
+                dg2.data[i] = ca_nonalpha * in[2]->data + (1 - ca_nonalpha) * in[0]->data;
+                dg3.dats[i] = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
             }
         }
 
@@ -251,8 +252,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float bc_nonalpha = alpha_0 * in[1]->gl_Position[3] * bc_w;
                 float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
-                dg2.data = bc_nonalpha * in[1]->data + (1 - bc_nonalpha) * in[2]->data;
-                dg3.data = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
+                dg2.data[i] = bc_nonalpha * in[1]->data + (1 - bc_nonalpha) * in[2]->data;
+                dg3.data[i] = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
             }
         }
 
@@ -293,8 +294,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
                 dg_1.data = in[2]->data;
-                dg2.data = ca_noalpha * in[2]->data + (1 - ca_noalpha) * in[0]->data;
-                dg3.data = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
+                dg2.data[i] = ca_noalpha * in[2]->data + (1 - ca_noalpha) * in[0]->data;
+                dg3.data[i] = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
             }
         }
 
@@ -336,8 +337,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ab_nonalpha = alpha_0 * in[0]->gl_Position[3] * ab_w;
                 float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
-                dg2.data = ab_nonalpha * in[0]->data + (1 - ab_nonalpha) * in[1]->data;
-                dg3.data = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
+                dg2.data[i] = ab_nonalpha * in[0]->data + (1 - ab_nonalpha) * in[1]->data;
+                dg3.data[i] = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
             }
         }
 
@@ -378,8 +379,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
                 dg_1.data = in[0]->data;
-                dg2.data = ca_noalpha * in[0]->data + (1 - ca_noalpha) * in[1]->data;
-                dg3.data = ba_nonalpha * in[2]->data + (1 - ba_nonalpha) * in[1]->data;
+                dg2.data[i] = ab_noalpha * in[0]->data + (1 - ab_noalpha) * in[1]->data;
+                dg3.data[i] = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
             }
         }
 
@@ -425,8 +426,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
                 dg_1.data = in[1]->data;
-                dg2.data = bc_noalpha * in[1]->data + (1 - bc_noalpha) * in[2]->data;
-                dg3.data = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
+                dg2.data[i] = bc_noalpha * in[1]->data + (1 - bc_noalpha) * in[2]->data;
+                dg3.data[i] = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
             }
         }
 
