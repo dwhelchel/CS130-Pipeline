@@ -99,8 +99,8 @@ void render(driver_state& state, render_type type)
                 state.vertex_shader(dv3, dg3, state.uniform_data);
 
                 // Rasterize the triangle with state and new vertex array
-                // rasterize_triangle(state, geo);
-                clip_triangle(state, geo, 0);
+                rasterize_triangle(state, geo);
+                // clip_triangle(state, geo, 0);
 
             }
 
@@ -280,8 +280,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 2, 0);
         alpha_1 = generate_alpha(state, sign, position, in, 2, 1);
 
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
-
         vec4 position_0 = alpha_0 * in[2]->gl_Position + (1 - alpha_0) * in[0]->gl_Position; // ca
         vec4 position_1 = alpha_1 * in[2]->gl_Position + (1 - alpha_1) * in[1]->gl_Position; // cb
 
@@ -320,8 +318,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 1, 2); // bc
         alpha_1 = generate_alpha(state, sign, position, in, 1, 0); // ba
 
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
-
         vec4 position_0 = alpha_0 * in[1]->gl_Position + (1 - alpha_0) * in[2]->gl_Position; //bc
         vec4 position_1 = alpha_1 * in[1]->gl_Position + (1 - alpha_1) * in[0]->gl_Position; //ba
 
@@ -359,8 +355,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     if (!vertexA && vertexB && vertexC) { // ab, ca ; call twice
         alpha_0 = generate_alpha(state, sign, position, in, 2, 0); //ca
         alpha_1 = generate_alpha(state, sign, position, in, 1, 0); //ba
-
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
 
         vec4 position_0 = alpha_0 * in[2]->gl_Position + (1 - alpha_0) * in[0]->gl_Position; // ca
         vec4 position_1 = alpha_1 * in[1]->gl_Position + (1 - alpha_1) * in[0]->gl_Position; // ba
@@ -409,8 +403,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1);
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2);
 
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
-
         vec4 position_0 = alpha_0 * in[0]->gl_Position + (1 - alpha_0) * in[1]->gl_Position; // ab
         vec4 position_1 = alpha_1 * in[0]->gl_Position + (1 - alpha_1) * in[2]->gl_Position; // ac
 
@@ -448,8 +440,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
     if (vertexA && !vertexB && vertexC) { // bc, ab ; call twice
         alpha_0 = generate_alpha(state, sign, position, in, 0, 1); //ab
         alpha_1 = generate_alpha(state, sign, position, in, 2, 1); //cb
-
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
 
         vec4 position_0 = alpha_0 * in[0]->gl_Position + (1 - alpha_0) * in[1]->gl_Position; // ab
         vec4 position_1 = alpha_1 * in[2]->gl_Position + (1 - alpha_1) * in[1]->gl_Position; // cb
@@ -498,8 +488,6 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         alpha_0 = generate_alpha(state, sign, position, in, 1, 2); // bc
         alpha_1 = generate_alpha(state, sign, position, in, 0, 2); // ac
 
-        std::cout << alpha_0 << " : " << alpha_1 << std::endl;
-
         vec4 position_0 = alpha_0 * in[1]->gl_Position + (1 - alpha_0) * in[2]->gl_Position; // bc
         vec4 position_1 = alpha_1 * in[0]->gl_Position + (1 - alpha_1) * in[2]->gl_Position; // ac
 
@@ -540,7 +528,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
         geo2[2] = &dg2; // bc
 
         clip_triangle(state, geo, face+1);
-        clip_triangle(state, geo, face+1);
+        clip_triangle(state, geo2, face+1);
     }
 
 }
