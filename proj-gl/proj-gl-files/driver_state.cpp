@@ -290,8 +290,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float ca_w = 1.0 / (alpha_0 * in[2]->gl_Position[3] + (1 - alpha_0) * in[0]->gl_Position[3]);
                 float ba_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_1) * in[0]->gl_Position[3]);
-                float ca_noalpha = alpha_0 * in[2]->gl_Position[3] * ca_w;
-                float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
+                float ca_noalpha = alpha_0 * in[0]->gl_Position[3] * ca_w;
+                float ba_nonalpha = alpha_1 * in[0]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
                 dg_1.data = in[2]->data;
                 dg2.data[i] = ca_noalpha * in[2]->data[i] + (1 - ca_noalpha) * in[0]->data[i];
@@ -375,8 +375,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
                 float cb_w = 1.0 / (alpha_1 * in[2]->gl_Position[3] + (1 - alpha_1) * in[1]->gl_Position[3]);
-                float ab_noalpha = alpha_0 * in[0]->gl_Position[3] * ab_w;
-                float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
+                float ab_noalpha = alpha_0 * in[1]->gl_Position[3] * ab_w;
+                float cb_nonalpha = alpha_1 * in[1]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
                 dg_1.data = in[0]->data;
                 dg2.data[i] = ab_noalpha * in[0]->data[i] + (1 - ab_noalpha) * in[1]->data[i];
@@ -422,8 +422,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
                 float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
-                float bc_noalpha = alpha_0 * in[1]->gl_Position[3] * bc_w;
-                float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
+                float bc_noalpha = alpha_0 * in[2]->gl_Position[3] * bc_w;
+                float ac_nonalpha = alpha_1 * in[2]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
                 dg_1.data = in[1]->data;
                 dg2.data[i] = bc_noalpha * in[1]->data[i] + (1 - bc_noalpha) * in[2]->data[i];
