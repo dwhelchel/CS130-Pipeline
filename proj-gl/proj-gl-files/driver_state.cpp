@@ -117,36 +117,38 @@ void render(driver_state& state, render_type type)
 
         /* Indexed */
         case render_type::indexed:
+        {
 
-        const data_geometry * geo[3];
-        data_geometry dg1;
-        data_geometry dg2;
-        data_geometry dg3;
-        data_vertex dv1;
-        data_vertex dv2;
-        data_vertex dv3;
+            const data_geometry * geo[3];
+            data_geometry dg1;
+            data_geometry dg2;
+            data_geometry dg3;
+            data_vertex dv1;
+            data_vertex dv2;
+            data_vertex dv3;
 
-        for (int i = 0; i < state.num_triangles * 3; i += 3) {
+            for (int i = 0; i < state.num_triangles * 3; i += 3) {
 
-            dv1.data = &state.vertex_data[state.index_data[i+0] * state.floats_per_vertex];
-            dg1.data = dv1.data;
+                dv1.data = &state.vertex_data[state.index_data[i+0] * state.floats_per_vertex];
+                dg1.data = dv1.data;
 
-            dv2.data = &state.vertex_data[state.index_data[i+1] * state.floats_per_vertex];
-            dg2.data = dv2.data;
+                dv2.data = &state.vertex_data[state.index_data[i+1] * state.floats_per_vertex];
+                dg2.data = dv2.data;
 
-            dv3.data = &state.vertex_data[state.index_data[i+2] * state.floats_per_vertex];
-            dg4.data = dv3.data;
+                dv3.data = &state.vertex_data[state.index_data[i+2] * state.floats_per_vertex];
+                dg3.data = dv3.data;
 
-            state.vertex_shader(dv1, dg1, state.uniform_data);
-            state.vertex_shader(dv2, dg2, state.uniform_data);
-            state.vertex_shader(dv3, dg3, state.uniform_data);
+                state.vertex_shader(dv1, dg1, state.uniform_data);
+                state.vertex_shader(dv2, dg2, state.uniform_data);
+                state.vertex_shader(dv3, dg3, state.uniform_data);
 
-            geo[0] = &dg1;
-            geo[1] = &dg2;
-            geo[2] = &dg3;
+                geo[0] = &dg1;
+                geo[1] = &dg2;
+                geo[2] = &dg3;
 
-            clip_triangle(state, geo, 0);
+                clip_triangle(state, geo, 0);
 
+            }
         }
 
         break;
