@@ -171,7 +171,7 @@ void render(driver_state& state, render_type type)
 
                     dg[j].data = dv[j].data;
                     state.vertex_shader(dv[j], dg[j], state.uniform_data);
-                    geo[j] = &dg[j];s
+                    geo[j] = &dg[j];
                 }
                 clip_triangle(state, geo, 0);
             }
