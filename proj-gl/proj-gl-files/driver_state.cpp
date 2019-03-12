@@ -167,7 +167,7 @@ void render(driver_state& state, render_type type)
                     count = i+j;
                     if (j == 0) count = 0;
 
-                    dv[i].data = &state.vertex_data[flag * state.floats_per_vertex];
+                    dv[i].data = &state.vertex_data[count * state.floats_per_vertex];
 
                     dg[i].data = dv[i].data;
                     state.vertex_shader(dv[i], dg[i], state.uniform_data);
