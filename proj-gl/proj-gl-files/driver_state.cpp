@@ -206,16 +206,16 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg3.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[2]->data;
-                dg2.data[i] = alpha_0 * in[2]->data * (1 - alpha_0) * in[0]->data; // ca
-                dg3.data[i] = alpha_1 * in[2]->data * (1 - alpha_1) * in[1]->data; // cb
+                dg2.data[i] = alpha_0 * in[2]->data[i] * (1 - alpha_0) * in[0]->data[i]; // ca
+                dg3.data[i] = alpha_1 * in[2]->data[i] * (1 - alpha_1) * in[1]->data[i]; // cb
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float ca_w = 1.0 / (alpha_0 * in[2]->gl_Position[3] + (1 - alpha_0) * in[0]->gl_Position[3]);
                 float cb_w = 1.0 / (alpha_1 * in[2]->gl_Position[3] + (1 - alpha_1) * in[1]->gl_Position[3]);
                 float ca_nonalpha = alpha_0 * in[2]->gl_Position[3] * ca_w;
                 float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
-                dg2.data[i] = ca_nonalpha * in[2]->data + (1 - ca_nonalpha) * in[0]->data;
-                dg3.dats[i] = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
+                dg2.data[i] = ca_nonalpha * in[2]->data[i] + (1 - ca_nonalpha) * in[0]->data[i];
+                dg3.dats[i] = cb_nonalpha * in[2]->data[i] + (1 - cb_nonalpha) * in[1]->data[i];
             }
         }
 
@@ -244,16 +244,16 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 dg3.data = in[0]->data;
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[1]->data;
-                dg2.data[i] = alpha_0 * in[1]->data + (1 - alpha_0) * in[2]->data;
-                dg3.data[i] = alpha_1 * in[1]->data + (1 - alpha_1) * in[0]->data;
+                dg2.data[i] = alpha_0 * in[1]->data[i] + (1 - alpha_0) * in[2]->data[i];
+                dg3.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[0]->data[i];
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
                 float ba_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_1) * in[0]->gl_Position[3]);
                 float bc_nonalpha = alpha_0 * in[1]->gl_Position[3] * bc_w;
                 float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
-                dg2.data[i] = bc_nonalpha * in[1]->data + (1 - bc_nonalpha) * in[2]->data;
-                dg3.data[i] = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
+                dg2.data[i] = bc_nonalpha * in[1]->data[i] + (1 - bc_nonalpha) * in[2]->data[i];
+                dg3.data[i] = ba_nonalpha * in[1]->data[i] + (1 - ba_nonalpha) * in[0]->data[i];
             }
         }
 
@@ -285,8 +285,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[1]->data; // b data
                 dg_1.data = in[2]->data; // c data
-                dg2.data[i] = alpha_0 * in[2]->data + (1 - alpha_0) * in[0]->data;
-                dg3.data[i] = alpha_1 * in[1]->data + (1 - alpha_1) * in[0]->data;
+                dg2.data[i] = alpha_0 * in[2]->data[i] + (1 - alpha_0) * in[0]->data[i];
+                dg3.data[i] = alpha_1 * in[1]->data[i] + (1 - alpha_1) * in[0]->data[i];
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float ca_w = 1.0 / (alpha_0 * in[2]->gl_Position[3] + (1 - alpha_0) * in[0]->gl_Position[3]);
                 float ba_w = 1.0 / (alpha_1 * in[1]->gl_Position[3] + (1 - alpha_1) * in[0]->gl_Position[3]);
@@ -294,8 +294,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ba_nonalpha = alpha_1 * in[1]->gl_Position[3] * ba_w;
                 dg1.data = in[1]->data;
                 dg_1.data = in[2]->data;
-                dg2.data[i] = ca_noalpha * in[2]->data + (1 - ca_noalpha) * in[0]->data;
-                dg3.data[i] = ba_nonalpha * in[1]->data + (1 - ba_nonalpha) * in[0]->data;
+                dg2.data[i] = ca_noalpha * in[2]->data[i] + (1 - ca_noalpha) * in[0]->data[i];
+                dg3.data[i] = ba_nonalpha * in[1]->data[i] + (1 - ba_nonalpha) * in[0]->data[i];
             }
         }
 
@@ -337,8 +337,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ab_nonalpha = alpha_0 * in[0]->gl_Position[3] * ab_w;
                 float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
-                dg2.data[i] = ab_nonalpha * in[0]->data + (1 - ab_nonalpha) * in[1]->data;
-                dg3.data[i] = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
+                dg2.data[i] = ab_nonalpha * in[0]->data[i] + (1 - ab_nonalpha) * in[1]->data[i];
+                dg3.data[i] = ac_nonalpha * in[0]->data[i] + (1 - ac_nonalpha) * in[2]->data[i];
             }
         }
 
@@ -370,8 +370,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[2]->data; // c data
                 dg_1.data = in[0]->data; // a data
-                dg2.data[i] = alpha_0 * in[0]->data + (1 - alpha_0) * in[1]->data; //ab
-                dg3.data[i] = alpha_1 * in[2]->data + (1 - alpha_1) * in[1]->data; //cb
+                dg2.data[i] = alpha_0 * in[0]->data[i] + (1 - alpha_0) * in[1]->data[i]; //ab
+                dg3.data[i] = alpha_1 * in[2]->data[i] + (1 - alpha_1) * in[1]->data[i]; //cb
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float ab_w = 1.0 / (alpha_0 * in[0]->gl_Position[3] + (1 - alpha_0) * in[1]->gl_Position[3]);
                 float cb_w = 1.0 / (alpha_1 * in[2]->gl_Position[3] + (1 - alpha_1) * in[1]->gl_Position[3]);
@@ -379,8 +379,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
                 dg_1.data = in[0]->data;
-                dg2.data[i] = ab_noalpha * in[0]->data + (1 - ab_noalpha) * in[1]->data;
-                dg3.data[i] = cb_nonalpha * in[2]->data + (1 - cb_nonalpha) * in[1]->data;
+                dg2.data[i] = ab_noalpha * in[0]->data[i] + (1 - ab_noalpha) * in[1]->data[i];
+                dg3.data[i] = cb_nonalpha * in[2]->data[i] + (1 - cb_nonalpha) * in[1]->data[i];
             }
         }
 
@@ -417,8 +417,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
             } else if (state.interp_rules[i] == interp_type::smooth) {
                 dg1.data = in[0]->data; // a data
                 dg_1.data = in[1]->data; // b data
-                dg2.data[i] = alpha_0 * in[1]->data + (1 - alpha_0) * in[2]->data; // bc
-                dg3.data[i] = alpha_1 * in[0]->data + (1 - alpha_1) * in[2]->data; // ac
+                dg2.data[i] = alpha_0 * in[1]->data[i] + (1 - alpha_0) * in[2]->data[i]; // bc
+                dg3.data[i] = alpha_1 * in[0]->data[i] + (1 - alpha_1) * in[2]->data[i]; // ac
             } else if (state.interp_rules[i] == interp_type::noperspective) {
                 float bc_w = 1.0 / (alpha_0 * in[1]->gl_Position[3] + (1 - alpha_0) * in[2]->gl_Position[3]);
                 float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
@@ -426,8 +426,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ac_nonalpha = alpha_1 * in[0]->gl_Position[3] * ac_w;
                 dg1.data = in[0]->data;
                 dg_1.data = in[1]->data;
-                dg2.data[i] = bc_noalpha * in[1]->data + (1 - bc_noalpha) * in[2]->data;
-                dg3.data[i] = ac_nonalpha * in[0]->data + (1 - ac_nonalpha) * in[2]->data;
+                dg2.data[i] = bc_noalpha * in[1]->data[i] + (1 - bc_noalpha) * in[2]->data[i];
+                dg3.data[i] = ac_nonalpha * in[0]->data[i] + (1 - ac_nonalpha) * in[2]->data[i];
             }
         }
 
