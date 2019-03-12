@@ -215,7 +215,7 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float cb_nonalpha = alpha_1 * in[2]->gl_Position[3] * cb_w;
                 dg1.data = in[2]->data;
                 dg2.data[i] = ca_nonalpha * in[2]->data[i] + (1 - ca_nonalpha) * in[0]->data[i];
-                dg3.dats[i] = cb_nonalpha * in[2]->data[i] + (1 - cb_nonalpha) * in[1]->data[i];
+                dg3.data[i] = cb_nonalpha * in[2]->data[i] + (1 - cb_nonalpha) * in[1]->data[i];
             }
         }
 
