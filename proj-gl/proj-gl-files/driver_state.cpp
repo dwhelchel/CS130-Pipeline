@@ -512,8 +512,8 @@ void check_vertices(driver_state& state, bool sign, int position, const data_geo
                 float ac_w = 1.0 / (alpha_1 * in[0]->gl_Position[3] + (1 - alpha_1) * in[2]->gl_Position[3]);
                 float bc_noalpha = alpha_0 * in[2]->gl_Position[3] * bc_w;
                 float ac_nonalpha = alpha_1 * in[2]->gl_Position[3] * ac_w;
-                dg1.data[i] = in[0]->data;
-                dg_1.data[i] = in[1]->data;
+                dg1.data[i] = in[0]->data[i];
+                dg_1.data[i] = in[1]->data[i];
                 dg2.data[i] = bc_noalpha * in[1]->data[i] + (1 - bc_noalpha) * in[2]->data[i];
                 dg3.data[i] = ac_nonalpha * in[0]->data[i] + (1 - ac_nonalpha) * in[2]->data[i];
             }
