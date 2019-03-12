@@ -165,10 +165,12 @@ void render(driver_state& state, render_type type)
                     int flag = i + j;
                     if (j > 0) {
                         dv[i].data = state.vertex_data + flag * state.floats_per_vertex;
-                        dg[i].data = dv[i].data;
-                        state.vertex_shader(dv[i], dg[i], state.uniform_data);
-                        geo[i] = &dg[i];
+                    } else {
+                        dv[i].data = state.vertex_data + j * state.floats_per_vertex;
                     }
+                    dg[i].data = dv[i].data;
+                    state.vertex_shader(dv[i], dg[i], state.uniform_data);
+                    geo[i] = &dg[i];
                 }
                 clip_triangle(state, geo, 0);
             }
